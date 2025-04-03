@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Test Search",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "test.py",
+            "console": "integratedTerminal",
+            "args": "search_test"
+        },
+        {
+            "name": "Test Vertex",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "test.py",
+            "console": "integratedTerminal",
+            "args": "vertex_test"
+        }
+    ]
+}
