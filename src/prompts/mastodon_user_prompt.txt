@@ -1,0 +1,6 @@
+Here's a conversation thread on Mastodon with user @{username}:
+
+{thread_content}
+
+Please generate a friendly and helpful response to continue this conversation.
+Your response should directly address what @{username} has asked or mentioned.

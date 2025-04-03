@@ -374,6 +374,12 @@ wheels = [
 ]
 
 [[package]]
+name = "html2text"
+version = "2024.2.26"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1a/43/e1d53588561e533212117750ee79ad0ba02a41f52a08c1df3396bd466c05/html2text-2024.2.26.tar.gz", hash = "sha256:05f8e367d15aaabc96415376776cdd11afd5127a77fce6e36afc60c563ca2c32", size = 56527 }
+
+[[package]]
 name = "httpcore"
 version = "1.0.7"
 source = { registry = "https://pypi.org/simple" }
@@ -857,6 +863,7 @@ dependencies = [
     { name = "asyncio" },
     { name = "google-cloud-aiplatform" },
     { name = "google-genai" },
+    { name = "html2text" },
     { name = "mastodon-py" },
     { name = "pydantic-settings" },
     { name = "pydantic-yaml" },
@@ -869,6 +876,7 @@ requires-dist = [
     { name = "asyncio", specifier = ">=3.4.3" },
     { name = "google-cloud-aiplatform", specifier = ">=1.87.0" },
     { name = "google-genai", specifier = ">=1.9.0" },
+    { name = "html2text", specifier = ">=2024.2.26" },
     { name = "mastodon-py", specifier = ">=2.0.1" },
     { name = "pydantic-settings", specifier = ">=2.8.1" },
     { name = "pydantic-yaml", specifier = ">=1.4.0" },

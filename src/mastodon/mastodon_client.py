@@ -84,6 +84,122 @@ class MastodonClient:
             self.logger.error(f"Error posting status: {e}")
             return None
     
+    def reply_to_mention(self, mention_status, content, visibility="public", media_ids=None, spoiler_text=None):
+        """
+        Reply to a mention from another user
+        
+        Args:
+            mention_status: The status object that contains the mention
+            content: The content of the reply (will be prefixed with @username)
+            visibility: Visibility level ('public', 'unlisted', 'private', 'direct')
+            media_ids: Optional list of media IDs to attach
+            spoiler_text: Optional content warning
+            
+        Returns:
+            The posted status object or None if there was an error
+        """
+        try:
+            # Extract the account username to reply to
+            account = mention_status.get('account', {})
+            username = account.get('acct')
+            
+            if not username:
+                self.logger.error("Could not determine username to reply to")
+                return None
+                
+            # Format the reply to include the username
+            formatted_reply = f"@{username} {content}"
+            
+            # Get the status ID to reply to
+            in_reply_to_id = mention_status.get('id')
+            
+            if not in_reply_to_id:
+                self.logger.error("Could not determine status ID to reply to")
+                return None
+                
+            # Post the reply
+            status = self.mastodon.status_post(
+                status=formatted_reply,
+                in_reply_to_id=in_reply_to_id,
+                media_ids=media_ids,
+                visibility=visibility,
+                spoiler_text=spoiler_text
+            )
+            
+            self.logger.info(f"Posted reply to @{username} with ID: {status['id']}")
+            return status
+            
+        except Exception as e:
+            self.logger.error(f"Error posting reply: {e}")
+            return None
+    
+    def get_status(self, status_id):
+        """
+        Fetch a status/post by its ID
+        
+        Args:
+            status_id: The ID of the status to fetch
+            
+        Returns:
+            The status object or None if there was an error
+        """
+        try:
+            status = self.mastodon.status(status_id)
+            self.logger.debug(f"Fetched status with ID: {status_id}")
+            return status
+        except Exception as e:
+            self.logger.error(f"Error fetching status {status_id}: {e}")
+            return None
+    
+    def get_thread(self, status_id):
+        """
+        Fetch an entire thread/conversation containing a status
+        
+        Args:
+            status_id: The ID of the status in the thread
+            
+        Returns:
+            List of statuses in the thread or empty list if there was an error
+        """
+        try:
+            context = self.mastodon.status_context(status_id)
+            # The context contains 'ancestors' and 'descendants' lists
+            ancestors = context.get('ancestors', [])
+            descendants = context.get('descendants', [])
+            
+            # Get the status itself
+            status = self.get_status(status_id)
+            
+            if status:
+                # Construct the full thread in order
+                thread = ancestors + [status] + descendants
+                self.logger.info(f"Fetched thread with {len(thread)} posts")
+                return thread
+            else:
+                return ancestors + descendants
+                
+        except Exception as e:
+            self.logger.error(f"Error fetching thread for status {status_id}: {e}")
+            return []
+    
+    def get_account(self, account_id):
+        """
+        Fetch account information by account ID
+        
+        Args:
+            account_id: The ID of the account to fetch
+            
+        Returns:
+            The account object or None if there was an error
+        """
+        try:
+            account = self.mastodon.account(account_id)
+            self.logger.debug(f"Fetched account: @{account.get('acct', 'unknown')}")
+            return account
+        except Exception as e:
+            self.logger.error(f"Error fetching account {account_id}: {e}")
+            return None
+    
     def check_notifications(self, limit=None):
         """Fetch recent notifications"""
         try:
@@ -125,15 +241,25 @@ class MastodonClient:
     
     def _handle_mention(self, notification):
         """Handle a mention notification specifically"""
-        # Example: Auto-reply to mentions
+        # Extract the status and account information
         status = notification.get('status', {})
         content = status.get('content', '')
         from_account = notification.get('account', {}).get('acct')
         
         self.logger.info(f"Mention from @{from_account}: {content}")
         
-        # You could implement auto-replies or other logic here
-        # self.post_status(f"@{from_account} Thanks for mentioning me!")
+        # Example of how to auto-reply to mentions
+        # Uncomment and modify this code to implement auto-replies
+        # if "help" in content.lower():
+        #     reply_content = "Here's how you can use my services..."
+        #     self.reply_to_mention(status, reply_content, visibility="direct")
+        # elif "hello" in content.lower() or "hi" in content.lower():
+        #     reply_content = "Hello there! How can I assist you today?"
+        #     self.reply_to_mention(status, reply_content)
+        # else:
+        #     # Default response
+        #     reply_content = "Thanks for reaching out! I've received your message."
+        #     self.reply_to_mention(status, reply_content)
     
     async def start_notification_polling(self, notification_handler=None):
         """
@@ -207,7 +333,7 @@ class MastodonClient:
                                 return done_callback
                             
                             try:
-                                await self.notification_callback(event_type, notification, create_done_callback(notification_id))
+                                await self.notification_callback(event_type, notification, create_done_callback(notification_id), self)
                             except Exception as e:
                                 self.logger.error(f"Error in notification callback: {e}")
                         
