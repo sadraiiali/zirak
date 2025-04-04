@@ -2,6 +2,7 @@ import asyncio
 from mastodon import Mastodon
 from src.settings import settings
 from src.logger import get_logger
+import re
 
 class MastodonClient:
     def __init__(self):
@@ -106,7 +107,12 @@ class MastodonClient:
             if not username:
                 self.logger.error("Could not determine username to reply to")
                 return None
-                
+
+            # Prepend newline if content starts with a RTL character to fix direction
+            rtl_pattern = re.compile('[\u0627-\u064a]|[\u0600-\u06FF]|[\u0590-\u05FF\uFB2A-\uFB4E]')
+            if len(re.findall(rtl_pattern, content[0])) > (len(content[0])/2):
+                content = f"\n{content}"
+            
             # Format the reply to include the username
             formatted_reply = f"@{username} {content}"
             
