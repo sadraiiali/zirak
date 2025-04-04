@@ -1,0 +1,17 @@
+services:
+  zirak:
+    image: ${ZIRAK_IMAGE:-reg.a15d.at/zirak:0.0.2}
+    container_name: zirak
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - ./env.yml:/app/env.yml
+    env_file:
+      - .env
+    environment:
+      - TZ=UTC
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
