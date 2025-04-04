@@ -8,9 +8,9 @@ class RunBotCommand(Command):
     description = "Start the Zirak bot with notification polling"
     options = [
         option(
-            "verbose",
-            "v",
-            description="Increase the verbosity of messages",
+            "debug",
+            "d",
+            description="Enable debug mode with additional output",
             flag=True
         ),
     ]
