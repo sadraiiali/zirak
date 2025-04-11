@@ -114,7 +114,10 @@ class MastodonClient:
                 content = f"\n{content}"
             
             # Format the reply to include the username
-            formatted_reply = f"@{username} {content}"
+            if f"@{username}" not in content:
+                formatted_reply = f"@{username} {content}"
+            else:
+                formatted_reply = content
             
             # Get the status ID to reply to
             in_reply_to_id = mention_status.get('id')
