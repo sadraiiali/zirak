@@ -1,0 +1,35 @@
+**Overall Component Philosophy:**
+
+The components in this system are designed to be **functional, clean, and predictable**, directly supporting the minimalist aesthetic while handling necessary complexity. They leverage Tailwind's utility classes for structure and styling, themed via CSS variables, much like Shadcn UI. The "feel" aims for **subtlety and clarity** – interactions have smooth transitions (`transition-colors`, `x-collapse`), focus states are clear (`ring-ring`), and visual hierarchy is maintained through careful use of color, borders, and spacing, avoiding unnecessary decoration. The core idea is building recognizable UI patterns that allow users to understand information flow and available actions intuitively, especially important given the potentially dense data related to the AI's processing.
+
+**Specific Component Breakdown:**
+
+1.  **Buttons (`.btn` variants):**
+    *   **Feel:** Buttons are designed to feel **responsive and clear** in their intent. Hover states provide immediate feedback with subtle background/text changes (`hover:bg-primary/90`, `hover:bg-accent`). Focus states are distinct using the ring utility, ensuring accessibility. They don't feel overly flashy but **solid and reliable**.
+    *   `btn-primary`: The main call-to-action. Feels **prominent, confident, and definitive**. It draws the eye and signals the most important positive action (like "Post" or "Confirm"). This mirrors the standard primary button approach in nearly all design systems, including Shadcn.
+    *   `btn-secondary`: A less emphasized action. Feels **muted but clearly interactive**. Good for alternative actions or less critical confirmations (like "Cancel" in a modal, "Close"). Similar to Shadcn's secondary variant.
+    *   `btn-outline`: Lower visual weight than solid buttons. Feels **lighter and less demanding** than primary/secondary. Often used for actions like "Run Again" or secondary modal actions where you want less visual competition. A common pattern.
+    *   `btn-ghost`: Minimal visual footprint. Feels **subtle, almost part of the background** until interacted with. Ideal for tertiary actions, icon-only buttons within tight layouts (like the collapse toggle), or actions that shouldn't distract. This aligns with ghost/text button patterns seen in many modern systems.
+    *   **Connection:** The variants provide a clear hierarchy, directly inspired by patterns popularized by systems like Shadcn, Material Design, etc., ensuring users understand the relative importance of actions.
+
+2.  **Cards (`.card`):**
+    *   **Feel:** Cards feel like **structured containers**. They provide clear visual boundaries using subtle borders (`border-border`) and a slight shadow (`shadow-sm`), grouping related information cleanly against the muted background. They make the layout feel **organized and segmented**, breaking down complex information into digestible chunks.
+    *   **Connection:** This is a fundamental UI primitive. The specific styling (minimal border, subtle shadow, `--radius` rounding) is very much in line with the clean aesthetic often found in Shadcn UI and similar minimalist systems.
+
+3.  **Collapsible Sections (AI Steps):**
+    *   **Feel:** These feel **interactive and efficient**. The chevron icon clearly indicates collapsibility, rotating smoothly on state change (`transition-transform`). The `x-collapse` animation provides a smooth opening/closing, making the disclosure feel **natural rather than abrupt**. They help manage complexity by hiding details until needed, making the sequence feel less overwhelming and more **focused**.
+    *   **Connection:** This implements the common "Accordion" or "Disclosure" pattern, essential for progressive disclosure. The visual integration (using borders, status indicators) makes it specific to this application's needs.
+
+4.  **Modal (Popup):**
+    *   **Feel:** The modal feels **focused and deliberately interruptive**. The overlay (`bg-black/60 backdrop-blur-sm`) dims the background, drawing attention squarely to the modal content. The entrance/exit transition (`opacity`, `scale`) makes its appearance feel **smooth but distinct**. It provides a dedicated space for tasks or detailed information (like LLM calls) without losing the main page context entirely.
+    *   **Connection:** A standard dialog/modal pattern. The styling (using `bg-card`, borders, header/footer structure) ensures it visually belongs to the rest of the design system, consistent with how modals are handled in systems like Shadcn.
+
+5.  **Tags/Badges:**
+    *   **Feel:** Tags feel like **informative labels**. They are small, visually distinct through background color, and provide quick contextual information (like `#AI`, `Processing`, `Complete`). They add **glanceable metadata** without taking up significant space.
+    *   **Connection:** Common "Chip" or "Badge" component pattern used for categorization or status indication across many design systems.
+
+6.  **Metadata Display:**
+    *   **Feel:** This list feels **structured and scannable**. The combination of icons, labels (muted), and values (foreground, medium weight) provides a clear, easy-to-read format for key-value information. It feels **organized and data-driven**.
+    *   **Connection:** A specific pattern implementation for displaying definition lists or key-value pairs, often seen in detail sections or sidebars.
+
+In essence, the components aim for a **modern, functional feel** inspired by the clarity and composability seen in systems like Shadcn UI, using subtle interactions and clear visual cues to guide the user through potentially complex information.

@@ -1,7 +1,6 @@
 import os
 import sys
 from typing import Dict, List, Generator, Union, Optional, Any
-from google.genai import types
 
 from .General import LLMBase
 
@@ -52,7 +51,7 @@ class VertexAI(LLMBase):
             # Import Vertex AI SDK
             try:
                 import vertexai
-                from vertexai.generative_models import GenerativeModel, Part, FinishReason
+                from vertexai.generative_models import GenerativeModel, FinishReason
                 import vertexai.preview.generative_models as generative_models
                 from google.oauth2 import service_account
                 from google.api_core import exceptions as google_api_exceptions

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastodon AI Bot - Dashboard</title>
+    <!-- Include forms, typography, line-clamp plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,line-clamp"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> <!-- Anime.js CDN -->
+    <style>
+        :root {
+            --background: 0 0% 100%; /* white */
+            --foreground: 222.2 84% 4.9%; /* slate-950 */
+            --muted: 210 40% 96.1%; /* slate-100 */
+            --muted-foreground: 215.4 16.3% 46.9%; /* slate-500 */
+            --card: 0 0% 100%; /* white */
+            --card-foreground: 222.2 84% 4.9%; /* slate-950 */
+            --border: 214.3 31.8% 91.4%; /* slate-200 */
+            --input: 214.3 31.8% 91.4%; /* slate-200 */
+            --primary: 221.2 83.2% 53.3%; /* indigo-600 */
+            --primary-foreground: 210 40% 98%; /* slate-50 */
+            --secondary: 210 40% 96.1%; /* slate-100 */
+            --secondary-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+            --accent: 210 40% 96.1%; /* slate-100 */
+            --accent-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+            --destructive: 0 84.2% 60.2%; /* red-600 */
+            --destructive-foreground: 210 40% 98%; /* slate-50 */
+            --success: 142.1 76.2% 36.3%; /* green-600 */
+            --success-foreground: 140 100% 97.1%; /* green-50 */
+            --warning: 47.9 95.8% 53.1%; /* yellow-500 */
+            --warning-foreground: 48 96.1% 14.1%; /* yellow-950 */
+            --ring: 221.2 83.2% 53.3%; /* indigo-500 */
+            --radius: 0.5rem;
+        }
+
+        /* Use CSS variables */
+        body {
+            background-color: hsl(var(--muted));
+            color: hsl(var(--foreground));
+            font-family: Inter, sans-serif;
+        }
+
+        .bg-background { background-color: hsl(var(--background)); }
+        .bg-card { background-color: hsl(var(--card)); }
+        .bg-muted { background-color: hsl(var(--muted)); }
+        .bg-primary { background-color: hsl(var(--primary)); }
+        .bg-secondary { background-color: hsl(var(--secondary)); }
+        .bg-accent { background-color: hsl(var(--accent)); }
+        .bg-destructive { background-color: hsl(var(--destructive)); }
+        .bg-success { background-color: hsl(var(--success)); }
+        .bg-warning { background-color: hsl(var(--warning)); }
+
+        .text-foreground { color: hsl(var(--foreground)); }
+        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+        .text-primary { color: hsl(var(--primary)); }
+        .text-primary-foreground { color: hsl(var(--primary-foreground)); }
+        .text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
+        .text-accent-foreground { color: hsl(var(--accent-foreground)); }
+        .text-destructive { color: hsl(var(--destructive)); }
+        .text-destructive-foreground { color: hsl(var(--destructive-foreground)); }
+        .text-success { color: hsl(var(--success)); }
+        .text-success-foreground { color: hsl(var(--success-foreground)); }
+        .text-warning { color: hsl(var(--warning)); }
+        .text-warning-foreground { color: hsl(var(--warning-foreground)); }
+
+        .border-border { border-color: hsl(var(--border)); }
+        .ring-ring { --tw-ring-color: hsl(var(--ring)); }
+
+        .rounded-lg { border-radius: var(--radius); }
+        .rounded-md { border-radius: calc(var(--radius) - 2px); }
+        .rounded-sm { border-radius: calc(var(--radius) - 4px); }
+
+        @import url('https://rsms.me/inter/inter.css');
+
+        [x-cloak] { display: none !important; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+        ::-webkit-scrollbar-track { background: hsl(var(--muted)); border-radius: 3px; }
+
+        /* Button Styles */
+        .btn { @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50; }
+        .btn-primary { @apply bg-primary text-primary-foreground hover:bg-primary/90; }
+        .btn-secondary { @apply bg-secondary text-secondary-foreground hover:bg-secondary/80; }
+        .btn-ghost { @apply hover:bg-accent hover:text-accent-foreground; }
+        .btn-outline { @apply border border-border bg-background hover:bg-accent hover:text-accent-foreground; }
+        .btn-md { @apply h-10 px-4 py-2; }
+        .btn-sm { @apply h-9 rounded-md px-3; }
+        .btn-xs { @apply h-8 rounded-md px-2.5 text-xs; }
+        .btn-icon { @apply h-10 w-10; }
+        .btn-icon-sm { @apply h-9 w-9; }
+        .btn-icon-xs { @apply h-8 w-8; }
+
+        /* Card Style */
+        .card { @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm; }
+
+        /* Badge variants */
+        .badge { @apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2; }
+        .badge-primary { @apply border-transparent bg-primary text-primary-foreground; }
+        .badge-secondary { @apply border-transparent bg-secondary text-secondary-foreground; }
+        .badge-outline { @apply text-foreground border-border; }
+        .badge-outline-primary { @apply text-primary border-primary/40 bg-primary/5; }
+        .badge-outline-green { @apply text-green-700 border-green-300 bg-green-50; }
+        .badge-outline-red { @apply text-red-700 border-red-300 bg-red-50; }
+        .badge-success { @apply border-transparent bg-success/10 text-success font-medium; }
+        .badge-destructive { @apply border-transparent bg-destructive/10 text-destructive font-medium; }
+
+
+        /* Dashboard card animation target */
+        .dashboard-card {
+            opacity: 0; /* Start hidden for animation */
+            background-color: hsl(var(--card));
+        }
+
+        .antialiased {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Basic Tooltip */
+        [data-tooltip] { position: relative; }
+        [data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 6px; padding: 4px 8px; background-color: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 4px; font-size: 0.75rem; line-height: 1rem; white-space: nowrap; z-index: 50; pointer-events: none; opacity: 0; transition: opacity 0.15s 0.1s ease-in-out; }
+        [data-tooltip]:hover::after { opacity: 1; }
+        /* Tooltip for sidebar */
+        aside [data-tooltip]:hover::after { left: 100%; bottom: auto; top: 50%; transform: translateY(-50%); margin-left: 12px; margin-bottom: 0; }
+    </style>
+</head>
+
+<body class="antialiased" x-data="pageUtils()">
+    <div class="flex h-screen overflow-hidden bg-muted">
+
+        <!-- Icon-Only Sidebar -->
+        <aside class="hidden md:flex md:flex-shrink-0">
+            <div class="flex w-16 flex-col items-center border-r border-border bg-background py-4">
+                <div class="flex flex-shrink-0 items-center justify-center h-10 w-10 mb-6" data-tooltip="Mastodon AI">
+                    <i data-lucide="bot" class="h-7 w-7 text-primary"></i>
+                </div>
+                <nav class="flex flex-col items-center flex-1 space-y-2 mt-2">
+                     <a href="dashboard.html"
+                        class="relative bg-accent text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        aria-current="page" data-tooltip="Dashboard">
+                        <i data-lucide="layout-dashboard" class="h-5 w-5 text-primary"></i> <!-- Active state -->
+                    </a>
+                    <a href="interaction-view.html"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="AI Interaction">
+                        <i data-lucide="message-square-code" class="h-5 w-5"></i>
+                    </a>
+                    <a href="history.html"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="History">
+                        <i data-lucide="history" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Configuration">
+                        <i data-lucide="sliders-horizontal" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Settings">
+                        <i data-lucide="settings" class="h-5 w-5"></i>
+                    </a>
+                </nav>
+                <div class="mt-auto flex flex-shrink-0 items-center justify-center pt-4">
+                    <a href="#" class="relative group block" data-tooltip="UserX - View Profile">
+                        <img class="inline-block h-9 w-9 rounded-full ring-2 ring-offset-2 ring-offset-background ring-transparent group-hover:ring-primary/50 transition-all"
+                            src="https://media.khiar.net/cache/accounts/avatars/114/280/126/567/340/828/original/f20936bb6bd8d8de.png"
+                            alt="User Avatar">
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-1 flex-col overflow-hidden">
+            <!-- Header/Toolbar -->
+            <header class="flex h-14 items-center gap-4 border-b border-border bg-background px-6 sticky top-0 z-30">
+                <h1 class="text-lg font-semibold text-foreground flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    Dashboard Overview
+                </h1>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                     <button class="btn btn-outline btn-sm" data-tooltip="Refresh Data">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                    <button class="btn btn-primary btn-sm flex items-center">
+                        <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> New Interaction
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8" x-cloak>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+                    <!-- Stat Card 1: Total Interactions -->
+                    <div class="dashboard-card card p-4 flex flex-col justify-between hover:border-primary/30 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-medium text-muted-foreground">Total Interactions</h3>
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-muted-foreground"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-semibold text-foreground">1,482</p>
+                            <p class="text-xs text-muted-foreground mt-1">+56 since yesterday</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 2: Success Rate -->
+                    <div class="dashboard-card card p-4 flex flex-col justify-between hover:border-success/40 transition-colors">
+                         <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-medium text-muted-foreground">Success Rate</h3>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-muted-foreground"></i>
+                        </div>
+                         <div>
+                            <p class="text-2xl font-semibold text-success">98.5%</p>
+                             <p class="text-xs text-muted-foreground mt-1">21 Errors (1.5%)</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 3: Avg. Processing Time -->
+                   <div class="dashboard-card card p-4 flex flex-col justify-between hover:border-blue-400/40 transition-colors">
+                         <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-medium text-muted-foreground">Avg. Proc. Time</h3>
+                            <i data-lucide="timer" class="w-4 h-4 text-muted-foreground"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-semibold text-foreground">1.8s</p>
+                            <p class="text-xs text-muted-foreground mt-1">vs 2.1s last week</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card 4: Active Users (Example) -->
+                    <div class="dashboard-card card p-4 flex flex-col justify-between hover:border-purple-400/40 transition-colors">
+                         <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-medium text-muted-foreground">Active Users (24h)</h3>
+                            <i data-lucide="users" class="w-4 h-4 text-muted-foreground"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-semibold text-foreground">23</p>
+                            <p class="text-xs text-success mt-1 inline-flex items-center"><i data-lucide="arrow-up-right" class="w-3 h-3 mr-0.5"></i> 12%</p>
+                        </div>
+                    </div>
+
+                    <!-- Chart Card: Interactions Over Time -->
+                    <div class="dashboard-card card md:col-span-2 lg:col-span-2 xl:col-span-2 p-4 flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-semibold text-foreground">Interactions (Last 7 Days)</h3>
+                            <select class="text-xs border-border rounded-md h-7 pl-2 pr-7 text-muted-foreground focus:ring-1 focus:ring-ring focus:border-ring">
+                                <option>Last 7 Days</option>
+                                <option>Last 30 Days</option>
+                                <option>This Month</option>
+                            </select>
+                        </div>
+                        <!-- Placeholder for a chart -->
+                        <div class="flex-grow flex items-center justify-center bg-muted/50 rounded-md border border-border min-h-[180px]">
+                           <div class="text-center text-muted-foreground">
+                                <i data-lucide="area-chart" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+                                <p class="text-sm">Chart Data Placeholder</p>
+                           </div>
+                        </div>
+                    </div>
+
+                    <!-- List Card: Recent Activity -->
+                     <div class="dashboard-card card md:col-span-2 lg:col-span-1 xl:col-span-2 p-4 flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                           <h3 class="text-base font-semibold text-foreground">Recent Activity</h3>
+                           <a href="history.html" class="btn btn-ghost btn-xs text-primary hover:bg-primary/10">View All</a>
+                        </div>
+                        <div class="flex-grow space-y-2.5 overflow-y-auto max-h-[180px] pr-1">
+                             <!-- Activity Item 1 -->
+                             <div class="flex items-center gap-3 text-sm">
+                                <span class="badge badge-success flex-shrink-0 w-6 h-6 items-center justify-center p-0"><i data-lucide="check" class="w-3.5 h-3.5"></i></span>
+                                <div class="flex-grow min-w-0">
+                                    <p class="text-foreground truncate line-clamp-1 text-xs" title="Draft a toot about open source AI">Draft a toot about open source AI</p>
+                                    <p class="text-muted-foreground text-xs">UserX · <span x-text="relativeTime(new Date(Date.now() - 1000 * 60 * 5))"></span></p>
+                                </div>
+                                <button class="btn btn-ghost btn-icon-xs text-muted-foreground hover:text-primary" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                            </div>
+                             <!-- Activity Item 2 -->
+                             <div class="flex items-center gap-3 text-sm">
+                                <span class="badge badge-destructive flex-shrink-0 w-6 h-6 items-center justify-center p-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></span>
+                                <div class="flex-grow min-w-0">
+                                    <p class="text-foreground truncate line-clamp-1 text-xs" title="Summarize article [long link...]">Summarize article [long link...]</p>
+                                    <p class="text-muted-foreground text-xs">UserX · <span x-text="relativeTime(new Date(Date.now() - 1000 * 60 * 125))"></span></p>
+                                </div>
+                                <button class="btn btn-ghost btn-icon-xs text-muted-foreground hover:text-primary" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                            </div>
+                            <!-- Activity Item 3 -->
+                             <div class="flex items-center gap-3 text-sm">
+                                <span class="badge badge-success flex-shrink-0 w-6 h-6 items-center justify-center p-0"><i data-lucide="check" class="w-3.5 h-3.5"></i></span>
+                                <div class="flex-grow min-w-0">
+                                    <p class="text-foreground truncate line-clamp-1 text-xs" title="Generate 5 hashtags for sustainable tech">Generate 5 hashtags for sustainable tech</p>
+                                    <p class="text-muted-foreground text-xs">UserY · <span x-text="relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 5))"></span></p>
+                                </div>
+                                <button class="btn btn-ghost btn-icon-xs text-muted-foreground hover:text-primary" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                            </div>
+                             <!-- Activity Item 4 -->
+                             <div class="flex items-center gap-3 text-sm">
+                                <span class="badge badge-warning flex-shrink-0 w-6 h-6 items-center justify-center p-0 bg-warning/10 text-warning-foreground"><i data-lucide="alert-triangle" class="w-3 h-3"></i></span>
+                                <div class="flex-grow min-w-0">
+                                    <p class="text-foreground truncate line-clamp-1 text-xs" title="Translate '...' - Rate Limit Hit">Translate '...' - Rate Limit Hit</p>
+                                    <p class="text-muted-foreground text-xs">UserZ · <span x-text="relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 8))"></span></p>
+                                </div>
+                                <button class="btn btn-ghost btn-icon-xs text-muted-foreground hover:text-primary" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                            </div>
+                             <!-- Add more items if needed -->
+                        </div>
+                    </div>
+
+                     <!-- Info Card: Top Models Used -->
+                    <div class="dashboard-card card p-4 flex flex-col">
+                        <h3 class="text-base font-semibold text-foreground mb-3">Top Models Used</h3>
+                        <div class="space-y-2.5 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-foreground">llama3-8b-instruct</span>
+                                <span class="badge badge-outline-primary">65%</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-foreground">gpt-4o-mini</span>
+                                <span class="badge badge-outline">20%</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-foreground">claude-3-sonnet</span>
+                                <span class="badge badge-outline">10%</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-muted-foreground text-xs">Other</span>
+                                <span class="badge badge-outline">5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Card: Top Intents -->
+                    <div class="dashboard-card card p-4 flex flex-col">
+                        <h3 class="text-base font-semibold text-foreground mb-3">Top Interaction Intents</h3>
+                        <div class="space-y-2.5 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-foreground">Toot Generation</span>
+                                <span class="badge badge-outline-green">40%</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-foreground">Summarization</span>
+                                <span class="badge badge-outline">25%</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-foreground">Question Answering</span>
+                                <span class="badge badge-outline">18%</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-foreground">Hashtag Suggestion</span>
+                                <span class="badge badge-outline">12%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-muted-foreground text-xs">Other</span>
+                                <span class="badge badge-outline">5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div> <!-- End Grid -->
+            </main>
+
+            <!-- Status Bar Footer -->
+            <footer
+                class="flex h-8 items-center text-xs border-t border-border bg-background px-4 text-muted-foreground flex-shrink-0 z-10">
+                <div class="flex items-center gap-1" data-tooltip="Overall System Status">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-success"></i> System Status: <span
+                        class="font-medium text-success ml-0.5">Operational</span>
+                    <!-- Example states:
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-warning"></i> Degraded Performance
+                    <i data-lucide="shield-off" class="w-4 h-4 text-destructive"></i> Outage
+                    -->
+                </div>
+                <div class="mx-3 border-l h-4 border-border"></div>
+                 <div class="flex items-center gap-1">
+                    <i data-lucide="activity" class="w-4 h-4"></i> Load Avg: <span
+                        class="font-medium text-foreground ml-0.5">0.15</span>
+                </div>
+                <div class="flex-1 text-right"
+                    x-data="{ currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }"
+                    x-init="setInterval(() => { currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }, 1000)">
+                    <span x-text="currentTime"></span>
+                </div>
+            </footer>
+        </div> <!-- End Main Content Area -->
+    </div> <!-- End Main Flex Container -->
+
+    <script>
+        function pageUtils() {
+            return {
+                // Relative time function (same as history page)
+                relativeTime(date) {
+                    const now = new Date();
+                    const diffSeconds = Math.round((now - date) / 1000);
+                    const diffMinutes = Math.round(diffSeconds / 60);
+                    const diffHours = Math.round(diffMinutes / 60);
+                    const diffDays = Math.round(diffHours / 24);
+
+                    if (diffSeconds < 5) return "Just now";
+                    if (diffMinutes < 1) return `${diffSeconds}s ago`; // Compact format
+                    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+                    if (diffHours < 24) return `${diffHours}h ago`;
+                    if (diffDays === 1) return `Yesterday`;
+                    if (diffDays < 7) return `${diffDays}d ago`;
+                    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                },
+                init() {
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        // Anime.js stagger animation for dashboard cards
+                        anime({
+                            targets: '.dashboard-card',
+                            translateY: [15, 0], // Slightly smaller translation
+                            opacity: [0, 1],
+                            delay: anime.stagger(60, { // Faster stagger
+                                start: 50, // Start quicker
+                                // Dynamically calculate grid columns if needed, or use a sensible default
+                                grid: [4, Math.ceil(document.querySelectorAll('.dashboard-card').length / 4)],
+                                from: 'first'
+                            }),
+                            duration: 400, // Faster duration
+                            easing: 'easeOutQuad'
+                        });
+                    });
+                }
+            }
+        }
+
+        // Initial call for icons that might be present before Alpine fully initializes
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

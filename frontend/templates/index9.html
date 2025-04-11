@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastodon AI Bot - Interaction History (Dense)</title>
+    <!-- Include forms and typography plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,line-clamp"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> <!-- Anime.js CDN -->
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            /* white */
+            --foreground: 222.2 84% 4.9%;
+            /* slate-950 */
+            --muted: 210 40% 96.1%;
+            /* slate-100 */
+            --muted-foreground: 215.4 16.3% 46.9%;
+            /* slate-500 */
+            --card: 0 0% 100%;
+            /* white */
+            --card-foreground: 222.2 84% 4.9%;
+            /* slate-950 */
+            --border: 214.3 31.8% 91.4%;
+            /* slate-200 */
+            --input: 214.3 31.8% 91.4%;
+            /* slate-200 */
+            --primary: 221.2 83.2% 53.3%;
+            /* indigo-600 */
+            --primary-foreground: 210 40% 98%;
+            /* slate-50 */
+            --secondary: 210 40% 96.1%;
+            /* slate-100 */
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            /* slate-900 */
+            --accent: 210 40% 96.1%;
+            /* slate-100 */
+            --accent-foreground: 222.2 47.4% 11.2%;
+            /* slate-900 */
+            --destructive: 0 84.2% 60.2%;
+            /* red-600 */
+            --destructive-foreground: 210 40% 98%;
+            /* slate-50 */
+            --success: 142.1 76.2% 36.3%;
+            /* green-600 */
+            --success-foreground: 140 100% 97.1%;
+            /* green-50 */
+            --warning: 47.9 95.8% 53.1%;
+            /* yellow-500 */
+            --warning-foreground: 48 96.1% 14.1%;
+            /* yellow-950 */
+            --ring: 221.2 83.2% 53.3%;
+            /* indigo-500 */
+            --radius: 0.5rem;
+        }
+
+        /* Use CSS variables */
+        body {
+            background-color: hsl(var(--muted));
+            color: hsl(var(--foreground));
+            font-family: Inter, sans-serif;
+        }
+
+        .bg-background {
+            background-color: hsl(var(--background));
+        }
+
+        .bg-card {
+            background-color: hsl(var(--card));
+        }
+
+        .bg-muted {
+            background-color: hsl(var(--muted));
+        }
+
+        .bg-primary {
+            background-color: hsl(var(--primary));
+        }
+
+        .bg-secondary {
+            background-color: hsl(var(--secondary));
+        }
+
+        .bg-accent {
+            background-color: hsl(var(--accent));
+        }
+
+        .bg-destructive {
+            background-color: hsl(var(--destructive));
+        }
+
+        .bg-success {
+            background-color: hsl(var(--success));
+        }
+
+        .bg-warning {
+            background-color: hsl(var(--warning));
+        }
+
+        .text-foreground {
+            color: hsl(var(--foreground));
+        }
+
+        .text-muted-foreground {
+            color: hsl(var(--muted-foreground));
+        }
+
+        .text-primary {
+            color: hsl(var(--primary));
+        }
+
+        .text-primary-foreground {
+            color: hsl(var(--primary-foreground));
+        }
+
+        .text-secondary-foreground {
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .text-accent-foreground {
+            color: hsl(var(--accent-foreground));
+        }
+
+        .text-destructive {
+            color: hsl(var(--destructive));
+        }
+
+        .text-destructive-foreground {
+            color: hsl(var(--destructive-foreground));
+        }
+
+        .text-success {
+            color: hsl(var(--success));
+        }
+
+        .text-success-foreground {
+            color: hsl(var(--success-foreground));
+        }
+
+        .text-warning {
+            color: hsl(var(--warning));
+        }
+
+        .text-warning-foreground {
+            color: hsl(var(--warning-foreground));
+        }
+
+        .border-border {
+            border-color: hsl(var(--border));
+        }
+
+        .ring-ring {
+            --tw-ring-color: hsl(var(--ring));
+        }
+
+        .rounded-lg {
+            border-radius: var(--radius);
+        }
+
+        .rounded-md {
+            border-radius: calc(var(--radius) - 2px);
+        }
+
+        .rounded-sm {
+            border-radius: calc(var(--radius) - 4px);
+        }
+
+        @import url('https://rsms.me/inter/inter.css');
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--border));
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsl(var(--muted-foreground));
+        }
+
+        ::-webkit-scrollbar-track {
+            background: hsl(var(--muted));
+            border-radius: 3px;
+        }
+
+        .btn {
+            @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+        }
+
+        .btn-primary {
+            @apply bg-primary text-primary-foreground hover:bg-primary/90;
+        }
+
+        .btn-secondary {
+            @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+        }
+
+        .btn-ghost {
+            @apply hover:bg-accent hover:text-accent-foreground;
+        }
+
+        .btn-outline {
+            @apply border border-border bg-background hover:bg-accent hover:text-accent-foreground;
+        }
+
+        .btn-md {
+            @apply h-10 px-4 py-2;
+        }
+
+        .btn-sm {
+            @apply h-9 rounded-md px-3;
+        }
+
+        .btn-xs {
+            @apply h-8 rounded-md px-2.5 text-xs;
+        }
+
+        .btn-icon {
+            @apply h-10 w-10;
+        }
+
+        .btn-icon-sm {
+            @apply h-9 w-9;
+        }
+
+        .btn-icon-xs {
+            @apply h-8 w-8;
+        }
+
+        /* Reduced size for denser action icons */
+
+        .card {
+            @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+        }
+
+        .antialiased {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Basic Tooltip */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:hover::after {
+            /* ... same as before ... */
+        }
+
+        /* Badge variants */
+        .badge {
+            @apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+        }
+
+        .badge-primary {
+            @apply border-transparent bg-primary text-primary-foreground;
+        }
+
+        .badge-secondary {
+            @apply border-transparent bg-secondary text-secondary-foreground;
+        }
+
+        .badge-outline {
+            @apply text-foreground border-border;
+        }
+
+        /* Default outline */
+        .badge-outline-primary {
+            @apply text-primary border-primary/40 bg-primary/5;
+        }
+
+        .badge-outline-blue {
+            @apply text-blue-700 border-blue-300 bg-blue-50;
+        }
+
+        .badge-outline-green {
+            @apply text-green-700 border-green-300 bg-green-50;
+        }
+
+        .badge-outline-purple {
+            @apply text-purple-700 border-purple-300 bg-purple-50;
+        }
+
+        .badge-outline-yellow {
+            @apply text-yellow-800 border-yellow-300 bg-yellow-50;
+        }
+
+        .badge-success {
+            @apply border-transparent bg-success/10 text-success font-medium;
+        }
+
+        /* Adjusted for subtle look */
+        .badge-destructive {
+            @apply border-transparent bg-destructive/10 text-destructive font-medium;
+        }
+
+        .badge-warning {
+            @apply border-transparent bg-warning/10 text-warning-foreground font-medium;
+        }
+
+        /* History card animation target */
+        .history-card {
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+        }
+
+        /* Ensure flex column for height */
+
+        /* Utility for line clamping */
+        /* Already included via plugin, but could be added here if needed: */
+        /* .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; } */
+    </style>
+</head>
+
+<body class="antialiased" x-data="pageUtils()">
+    <div class="flex h-screen overflow-hidden bg-muted">
+
+        <!-- Icon-Only Sidebar (Same as before) -->
+        <aside class="hidden md:flex md:flex-shrink-0">
+            <div class="flex w-16 flex-col items-center border-r border-border bg-background py-4">
+                <div class="flex flex-shrink-0 items-center justify-center h-10 w-10 mb-6" data-tooltip="Mastodon AI">
+                    <i data-lucide="bot" class="h-7 w-7 text-primary"></i>
+                </div>
+                <nav class="flex flex-col items-center flex-1 space-y-2 mt-2">
+                    <a href="interaction-view.html"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="AI Interaction">
+                        <i data-lucide="message-square-code" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#"
+                        class="relative bg-accent text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        aria-current="page" data-tooltip="History">
+                        <i data-lucide="history" class="h-5 w-5 text-primary"></i> <!-- Active state -->
+                    </a>
+                    <a href="#"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Configuration">
+                        <i data-lucide="sliders-horizontal" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#"
+                        class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Settings">
+                        <i data-lucide="settings" class="h-5 w-5"></i>
+                    </a>
+                </nav>
+                <div class="mt-auto flex flex-shrink-0 items-center justify-center pt-4">
+                    <a href="#" class="relative group block" data-tooltip="UserX - View Profile">
+                        <img class="inline-block h-9 w-9 rounded-full ring-2 ring-offset-2 ring-offset-background ring-transparent group-hover:ring-primary/50 transition-all"
+                            src="https://media.khiar.net/cache/accounts/avatars/114/280/126/567/340/828/original/f20936bb6bd8d8de.png"
+                            alt="User Avatar">
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-1 flex-col overflow-hidden">
+            <!-- Header/Toolbar (Same as before) -->
+            <header class="flex h-14 items-center gap-4 border-b border-border bg-background px-6 sticky top-0 z-30">
+                <h1
+                    class="text-lg font-semibold text-foreground flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    Interaction History</h1>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button class="btn btn-outline btn-sm flex flex-row items-center">
+                        <i data-lucide="filter" class="w-4 h-4 mr-1.5"></i> Filter
+                    </button>
+                    <button class="btn btn-primary btn-sm flex flex-row items-center">
+                        <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> New Interaction
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+
+                    <!-- History Item Card 1: Success -->
+                    <div class="history-card card hover:shadow-lg hover:border-primary/30 transition-all duration-200">
+                        <!-- Card Header -->
+                        <div class="p-3 border-b border-border flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <img class="inline-block h-6 w-6 rounded-full flex-shrink-0"
+                                    src="https://media.khiar.net/cache/accounts/avatars/114/280/126/567/340/828/original/f20936bb6bd8d8de.png"
+                                    alt="UserX Avatar">
+                                <span class="text-sm font-medium text-foreground truncate">UserX</span>
+                            </div>
+                            <span class="badge badge-success flex flex-row items-center whitespace-nowrap">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1 flex-shrink-0"></i> Completed
+                            </span>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="p-3 flex-grow space-y-2">
+                            <p class="text-sm font-medium text-foreground line-clamp-2"
+                                title="Draft a short, engaging toot about the recent advancements in open-source AI models. Mention potential benefits for the Mastodon community.">
+                                Draft a short, engaging toot about the recent advancements in open-source AI models.
+                                Mention potential benefits for the Mastodon community.
+                            </p>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="badge badge-outline-blue">#AI</span>
+                                <span class="badge badge-outline-purple">#OpenSource</span>
+                                <span class="badge badge-outline">#Mastodon</span>
+                            </div>
+                        </div>
+                        <!-- Card Footer -->
+                        <div
+                            class="p-3 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center gap-1" title="Model"> <i data-lucide="cpu"
+                                        class="w-3 h-3"></i> llama3-8b </span>
+                                <span class="inline-flex items-center gap-1" title="Duration"> <i data-lucide="timer"
+                                        class="w-3 h-3"></i> 5.2s </span>
+                            </div>
+                            <div class="flex items-center gap-0.5"> <!-- Reduced gap for icon buttons -->
+                                <button class="btn btn-ghost btn-icon-xs hover:text-primary" title="Copy Prompt"><i
+                                        data-lucide="copy" class="w-4 h-4 flex flex-row items-center"></i></button>
+                                <a href="#" class="btn btn-ghost btn-icon-xs text-primary hover:bg-primary/10"
+                                    title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                            </div>
+                        </div>
+                        <p class="px-3 pb-2 text-xs text-muted-foreground/80 text-right"
+                            x-text="` ${relativeTime(new Date(Date.now() - 1000 * 60 * 5))}`"></p>
+                    </div>
+
+                    <!-- History Item Card 2: Failed -->
+                    <div
+                        class="history-card card hover:shadow-lg hover:border-destructive/30 transition-all duration-200">
+                        <!-- Card Header -->
+                        <div class="p-3 border-b border-border flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <img class="inline-block h-6 w-6 rounded-full flex-shrink-0"
+                                    src="https://media.khiar.net/cache/accounts/avatars/114/280/126/567/340/828/original/f20936bb6bd8d8de.png"
+                                    alt="UserX Avatar">
+                                <span class="text-sm font-medium text-foreground truncate">UserX</span>
+                            </div>
+                            <span class="badge badge-destructive flex flex-row items-center whitespace-nowrap">
+                                <i data-lucide="x-circle" class="w-4 h-4 mr-1 flex-shrink-0"></i> Failed
+                            </span>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="p-3 flex-grow space-y-2">
+                            <p class="text-sm font-medium text-foreground line-clamp-2"
+                                title="Summarize the key points from this article: [link that is too long to fetch or caused an error during processing maybe? Let's add more text to test clamping.]">
+                                Summarize the key points from this article: [link that is too long to fetch or caused an
+                                error during processing maybe? Let's add more text to test clamping.]
+                            </p>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="badge badge-outline-yellow">#Summarization</span>
+                                <span class="badge badge-outline">#Error</span>
+                            </div>
+                        </div>
+                        <!-- Card Footer -->
+                        <div
+                            class="p-3 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center gap-1" title="Model"> <i data-lucide="cpu"
+                                        class="w-3 h-3"></i> gpt-3.5-turbo </span>
+                                <span class="inline-flex items-center gap-1" title="Duration"> <i data-lucide="timer"
+                                        class="w-3 h-3"></i> 1.1s </span>
+                            </div>
+                            <div class="flex items-center gap-0.5">
+                                <button class="btn btn-ghost btn-icon-xs hover:text-primary" title="Copy Prompt"><i
+                                        data-lucide="copy" class="w-4 h-4 flex flex-row items-center"></i></button>
+                                <button class="btn btn-ghost btn-icon-xs hover:text-destructive" title="Retry Failed"><i
+                                        data-lucide="refresh-cw" class="w-4 h-4 flex flex-row items-center"></i></button>
+                                <a href="#" class="btn btn-ghost btn-icon-xs text-primary hover:bg-primary/10"
+                                    title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                            </div>
+                        </div>
+                        <p class="px-3 pb-2 text-xs text-muted-foreground/80 text-right"
+                            x-text="` ${relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 2))}`"></p>
+                    </div>
+
+                    <!-- History Item Card 3: Success -->
+                    <div class="history-card card hover:shadow-lg hover:border-primary/30 transition-all duration-200">
+                        <!-- Card Header -->
+                        <div class="p-3 border-b border-border flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <img class="inline-block h-6 w-6 rounded-full flex-shrink-0"
+                                    src="https://media.khiar.net/cache/accounts/avatars/114/280/126/567/340/828/original/f20936bb6bd8d8de.png"
+                                    alt="UserX Avatar">
+                                <span class="text-sm font-medium text-foreground truncate">UserX</span>
+                            </div>
+                            <span class="badge badge-success flex flex-row items-center whitespace-nowrap">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1 flex-shrink-0"></i> Completed
+                            </span>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="p-3 flex-grow space-y-2">
+                            <p class="text-sm font-medium text-foreground line-clamp-2"
+                                title="Generate 5 hashtag ideas for a post about sustainable tech conferences in Europe.">
+                                Generate 5 hashtag ideas for a post about sustainable tech conferences in Europe.
+                            </p>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="badge badge-outline-green">#Hashtags</span>
+                                <span class="badge badge-outline">#Content</span>
+                                <span class="badge badge-outline-primary">#Marketing</span>
+                            </div>
+                        </div>
+                        <!-- Card Footer -->
+                        <div
+                            class="p-3 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center gap-1" title="Model"> <i data-lucide="cpu"
+                                        class="w-3 h-3"></i> claude-3-sonnet </span>
+                                <span class="inline-flex items-center gap-1" title="Duration"> <i data-lucide="timer"
+                                        class="w-3 h-3"></i> 8.7s </span>
+                            </div>
+                            <div class="flex items-center gap-0.5">
+                                <button class="btn btn-ghost btn-icon-xs hover:text-primary" title="Copy Prompt"><i
+                                        data-lucide="copy" class="w-4 h-4 flex flex-row items-center"></i></button>
+                                <a href="#" class="btn btn-ghost btn-icon-xs text-primary hover:bg-primary/10"
+                                    title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                            </div>
+                        </div>
+                        <p class="px-3 pb-2 text-xs text-muted-foreground/80 text-right"
+                            x-text="` ${relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 24 * 3))}`"></p>
+                    </div>
+
+                    <!-- Add more cards here for testing density -->
+                    <!-- Card 4 -->
+                    <div class="history-card card hover:shadow-lg hover:border-primary/30 transition-all duration-200">
+                        <!-- ... content similar to above ... -->
+                        <div class="p-3 border-b border-border flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0"> <img
+                                    class="inline-block h-6 w-6 rounded-full flex-shrink-0"
+                                    src="https://placekitten.com/g/32/32" alt="User Y"> <span
+                                    class="text-sm font-medium text-foreground truncate">UserY</span> </div>
+                            <span class="badge badge-success flex flex-row items-center whitespace-nowrap"> <i data-lucide="check-circle"
+                                    class="w-4 h-4 mr-1 flex-shrink-0"></i> Completed </span>
+                        </div>
+                        <div class="p-3 flex-grow space-y-2">
+                            <p class="text-sm font-medium text-foreground line-clamp-2"
+                                title="What is the weather like in Tokyo right now?"> What is the weather like in Tokyo
+                                right now? </p>
+                            <div class="flex items-center gap-1.5 flex-wrap"> <span
+                                    class="badge badge-outline">#Question</span> <span
+                                    class="badge badge-outline-yellow">#Realtime</span> </div>
+                        </div>
+                        <div
+                            class="p-3 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
+                            <div class="flex items-center gap-3"> <span class="inline-flex items-center gap-1"
+                                    title="Model"> <i data-lucide="cpu" class="w-3 h-3"></i> gemini-pro </span> <span
+                                    class="inline-flex items-center gap-1" title="Duration"> <i data-lucide="timer"
+                                        class="w-3 h-3"></i> 2.1s </span> </div>
+                            <div class="flex items-center gap-0.5"> <button
+                                    class="btn btn-ghost btn-icon-xs hover:text-primary" title="Copy Prompt"><i
+                                        data-lucide="copy" class="w-4 h-4 flex flex-row items-center"></i></button> <a href="#"
+                                    class="btn btn-ghost btn-icon-xs text-primary hover:bg-primary/10"
+                                    title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></a> </div>
+                        </div>
+                        <p class="px-3 pb-2 text-xs text-muted-foreground/80 text-right"
+                            x-text="` ${relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 24 * 4))}`"></p>
+                    </div>
+                    <!-- Card 5 -->
+                    <div class="history-card card hover:shadow-lg hover:border-primary/30 transition-all duration-200">
+                        <!-- ... content similar to above ... -->
+                        <div class="p-3 border-b border-border flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0"> <img
+                                    class="inline-block h-6 w-6 rounded-full flex-shrink-0"
+                                    src="https://media.khiar.net/cache/accounts/avatars/114/280/126/567/340/828/original/f20936bb6bd8d8de.png"
+                                    alt="UserX Avatar"> <span
+                                    class="text-sm font-medium text-foreground truncate">UserX</span> </div>
+                            <span class="badge badge-success flex flex-row items-center whitespace-nowrap"> <i data-lucide="check-circle"
+                                    class="w-4 h-4 mr-1 flex-shrink-0"></i> Completed </span>
+                        </div>
+                        <div class="p-3 flex-grow space-y-2">
+                            <p class="text-sm font-medium text-foreground line-clamp-2"
+                                title="Translate 'hello world' into French and Japanese."> Translate 'hello world' into
+                                French and Japanese. </p>
+                            <div class="flex items-center gap-1.5 flex-wrap"> <span
+                                    class="badge badge-outline-primary">#Translation</span> </div>
+                        </div>
+                        <div
+                            class="p-3 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
+                            <div class="flex items-center gap-3"> <span class="inline-flex items-center gap-1"
+                                    title="Model"> <i data-lucide="cpu" class="w-3 h-3"></i> gpt-4o-mini </span> <span
+                                    class="inline-flex items-center gap-1" title="Duration"> <i data-lucide="timer"
+                                        class="w-3 h-3"></i> 3.5s </span> </div>
+                            <div class="flex items-center gap-0.5"> <button
+                                    class="btn btn-ghost btn-icon-xs hover:text-primary" title="Copy Prompt"><i
+                                        data-lucide="copy" class="w-4 h-4 flex flex-row items-center"></i></button> <a href="#"
+                                    class="btn btn-ghost btn-icon-xs text-primary hover:bg-primary/10"
+                                    title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></a> </div>
+                        </div>
+                        <p class="px-3 pb-2 text-xs text-muted-foreground/80 text-right"
+                            x-text="` ${relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 24 * 5 - 10000))}`"></p>
+                    </div>
+                    <!-- Card 6 -->
+                    <div
+                        class="history-card card hover:shadow-lg hover:border-destructive/30 transition-all duration-200">
+                        <!-- ... content similar to above, but failed -->
+                        <div class="p-3 border-b border-border flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0"> <img
+                                    class="inline-block h-6 w-6 rounded-full flex-shrink-0"
+                                    src="https://placekitten.com/g/32/32" alt="User Y"> <span
+                                    class="text-sm font-medium text-foreground truncate">UserY long name check
+                                    truncation</span> </div>
+                            <span class="badge badge-destructive whitespace-nowrap flex flex-row items-center"> <i data-lucide="alert-triangle"
+                                    class="w-4 h-4 mr-1 flex-shrink-0"></i> Rate Limit </span>
+                        </div>
+                        <div class="p-3 flex-grow space-y-2">
+                            <p class="text-sm font-medium text-foreground line-clamp-2"
+                                title="Generate a complex Python script for data analysis immediately after the last request.">
+                                Generate a complex Python script for data analysis immediately after the last request.
+                            </p>
+                            <div class="flex items-center gap-1.5 flex-wrap"> <span
+                                    class="badge badge-outline-purple">#Code</span> <span
+                                    class="badge badge-outline">#Python</span> <span
+                                    class="badge badge-outline-destructive">#Error</span></div>
+                        </div>
+                        <div
+                            class="p-3 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
+                            <div class="flex items-center gap-3"> <span class="inline-flex items-center gap-1"
+                                    title="Model"> <i data-lucide="cpu" class="w-3 h-3"></i> N/A </span> <span
+                                    class="inline-flex items-center gap-1" title="Duration"> <i data-lucide="timer"
+                                        class="w-3 h-3"></i> 0.1s </span> </div>
+                            <div class="flex items-center gap-0.5"> <button
+                                    class="btn btn-ghost btn-icon-xs hover:text-primary" title="Copy Prompt"><i
+                                        data-lucide="copy" class="w-4 h-4 flex flex-row items-center"></i></button> <button
+                                    class="btn btn-ghost btn-icon-xs hover:text-destructive" title="Retry"><i
+                                        data-lucide="refresh-cw" class="w-4 h-4 flex flex-row items-center"></i></button> <a href="#"
+                                    class="btn btn-ghost btn-icon-xs text-primary hover:bg-primary/10"
+                                    title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></a> </div>
+                        </div>
+                        <p class="px-3 pb-2 text-xs text-muted-foreground/80 text-right"
+                            x-text="` ${relativeTime(new Date(Date.now() - 1000 * 60 * 60 * 24 * 5))}`"></p>
+                    </div>
+
+                </div> <!-- End Grid -->
+            </main>
+
+            <!-- Status Bar Footer (Updated count) -->
+            <footer
+                class="flex h-8 items-center text-xs border-t border-border bg-background px-4 text-muted-foreground flex-shrink-0 z-10">
+                <div class="flex items-center gap-1">
+                    <i data-lucide="list" class="w-4 h-4 flex flex-row items-center"></i> Total Interactions: <span
+                        class="font-medium text-foreground ml-0.5">6</span>
+                </div>
+                <div class="mx-3 border-l h-4 border-border"></div>
+                <div class="flex items-center gap-1">
+                    <i data-lucide="filter" class="w-4 h-4 flex flex-row items-center"></i> Filters: <span
+                        class="font-medium text-foreground ml-0.5">None Active</span>
+                </div>
+                <div class="flex-1 text-right"
+                    x-data="{ currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }"
+                    x-init="setInterval(() => { currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }, 1000)">
+                    <span x-text="currentTime"></span>
+                </div>
+            </footer>
+        </div> <!-- End Main Content Area -->
+    </div> <!-- End Main Flex Container -->
+
+    <script>
+        function pageUtils() {
+            return {
+                // Relative time function (same as before)
+                relativeTime(date) {
+                    const now = new Date();
+                    const diffSeconds = Math.round((now - date) / 1000);
+                    const diffMinutes = Math.round(diffSeconds / 60);
+                    const diffHours = Math.round(diffMinutes / 60);
+                    const diffDays = Math.round(diffHours / 24);
+
+                    if (diffSeconds < 5) return "Just now";
+                    if (diffMinutes < 1) return `${diffSeconds} sec ago`; // Shorter text
+                    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+                    if (diffHours < 24) return `${diffHours} hr ago`;
+                    if (diffDays === 1) return `Yesterday`;
+                    if (diffDays < 7) return `${diffDays} days ago`;
+                    return date.toLocaleDateString([], { month: 'short', day: 'numeric' }); // Shorter date format
+                },
+                init() {
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        // Anime.js stagger animation for history cards
+                        anime({
+                            targets: '.history-card',
+                            translateY: [20, 0],
+                            opacity: [0, 1],
+                            delay: anime.stagger(80, { // Slightly faster stagger for denser feel
+                                start: 100,
+                                grid: [3, Math.ceil(document.querySelectorAll('.history-card').length / 3)], // Define grid dimensions for potentially better stagger calc
+                                from: 'first'
+                            }),
+                            duration: 450, // Slightly faster duration
+                            easing: 'easeOutQuad'
+                        });
+                    });
+                }
+            }
+        }
+
+        document.addEventListener('alpine:init', () => { });
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

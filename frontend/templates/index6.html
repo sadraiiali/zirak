@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastodon AI Bot - Interaction View</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background: 0 0% 100%; /* white */
+            --foreground: 222.2 84% 4.9%; /* slate-950 */
+            --muted: 210 40% 96.1%; /* slate-100 */
+            --muted-foreground: 215.4 16.3% 46.9%; /* slate-500 */
+            --card: 0 0% 100%; /* white */
+            --card-foreground: 222.2 84% 4.9%; /* slate-950 */
+            --border: 214.3 31.8% 91.4%; /* slate-200 */
+            --input: 214.3 31.8% 91.4%; /* slate-200 */
+            --primary: 221.2 83.2% 53.3%; /* indigo-600 */
+            --primary-foreground: 210 40% 98%; /* slate-50 */
+            --secondary: 210 40% 96.1%; /* slate-100 */
+            --secondary-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+            --accent: 210 40% 96.1%; /* slate-100 */
+            --accent-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+            --destructive: 0 84.2% 60.2%; /* red-600 */
+            --destructive-foreground: 210 40% 98%; /* slate-50 */
+            --ring: 221.2 83.2% 53.3%; /* indigo-500 */
+            --radius: 0.5rem;
+        }
+        /* Use CSS variables directly */
+        body { background-color: hsl(var(--muted)); color: hsl(var(--foreground)); }
+        .bg-background { background-color: hsl(var(--background)); }
+        .bg-card { background-color: hsl(var(--card)); }
+        .bg-muted { background-color: hsl(var(--muted)); }
+        .bg-primary { background-color: hsl(var(--primary)); }
+        .bg-secondary { background-color: hsl(var(--secondary)); }
+        .text-foreground { color: hsl(var(--foreground)); }
+        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+        .text-primary { color: hsl(var(--primary)); }
+        .text-primary-foreground { color: hsl(var(--primary-foreground)); }
+        .text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
+        .text-accent-foreground { color: hsl(var(--accent-foreground)); }
+        .border-border { border-color: hsl(var(--border)); }
+        .ring-ring { ring-color: hsl(var(--ring)); }
+        .rounded-lg { border-radius: var(--radius); }
+        .rounded-md { border-radius: calc(var(--radius) - 2px); }
+
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+        ::-webkit-scrollbar-track { background: hsl(var(--muted)); border-radius: 3px; }
+
+        .btn { @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50; }
+        .btn-primary { @apply bg-primary text-primary-foreground hover:bg-primary/90; }
+        .btn-secondary { @apply bg-secondary text-secondary-foreground hover:bg-secondary/80; }
+        .btn-ghost { @apply hover:bg-accent hover:text-accent-foreground; }
+        .btn-outline { @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground; }
+        .btn-md { @apply h-10 px-4 py-2; }
+        .btn-sm { @apply h-9 rounded-md px-3; }
+        .btn-xs { @apply h-8 rounded-md px-2.5; }
+        .btn-icon { @apply h-10 w-10; }
+        .btn-icon-sm { @apply h-9 w-9; }
+        .btn-icon-xs { @apply h-8 w-8; }
+
+        .card { @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm; }
+
+        .antialiased { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        /* Tooltip styles (basic, can be enhanced with Alpine) */
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 12px; /* Spacing from icon */
+            padding: 4px 8px;
+            background-color: hsl(var(--foreground));
+            color: hsl(var(--background));
+            border-radius: 4px;
+            font-size: 0.75rem; /* text-xs */
+            line-height: 1rem;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            pointer-events: none; /* Avoid tooltip intercepting hover */
+        }
+         [data-tooltip]:hover::after {
+             opacity: 1;
+         }
+
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex h-screen overflow-hidden bg-muted">
+
+        <!-- Icon-Only Sidebar -->
+        <aside class="hidden md:flex md:flex-shrink-0">
+            <div class="flex w-16 flex-col items-center border-r border-border bg-background py-4">
+                <div class="flex flex-shrink-0 items-center justify-center h-10 w-10 mb-6">
+                    <i data-lucide="bot" class="h-7 w-7 text-primary"></i>
+                </div>
+                <nav class="flex flex-col items-center flex-1 space-y-2 mt-2">
+                    <a href="#" class="relative bg-accent text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium" aria-current="page" data-tooltip="AI Interaction">
+                        <i data-lucide="message-square-code" class="h-5 w-5 text-primary"></i>
+                    </a>
+                    <a href="#" class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium" data-tooltip="History">
+                        <i data-lucide="history" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#" class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium" data-tooltip="Configuration">
+                        <i data-lucide="sliders-horizontal" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#" class="relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium" data-tooltip="Settings">
+                        <i data-lucide="settings" class="h-5 w-5"></i>
+                    </a>
+                </nav>
+                 <!-- User Account Icon -->
+                <div class="mt-auto flex flex-shrink-0 items-center justify-center pt-4">
+                    <a href="#" class="relative group block" data-tooltip="Your Name - View Profile">
+                         <img class="inline-block h-9 w-9 rounded-full ring-2 ring-offset-2 ring-offset-background ring-transparent group-hover:ring-primary/50 transition-all" src="https://via.placeholder.com/100/E2E8F0/475569?text=U" alt="User Avatar">
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-1 flex-col overflow-hidden">
+             <!-- Header/Toolbar -->
+            <header class="flex h-14 items-center gap-4 border-b bg-background px-6 sticky top-0 z-10">
+                <h1 class="text-lg font-semibold text-foreground flex-1">AI Interaction Sequence</h1>
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-outline btn-sm">
+                         <i data-lucide="rotate-cw" class="w-4 h-4 mr-1.5"></i> Refresh
+                    </button>
+                     <button class="btn btn-primary btn-sm">
+                         <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> New Task
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto p-6 lg:p-8">
+                <div class="card max-w-6xl mx-auto overflow-hidden" x-data="aiInteractionPanel()" x-init="startProcessingSequence()" x-cloak>
+                    <div class="md:flex">
+                        <!-- Left Panel: Prompt Details -->
+                        <div class="md:w-2/5 p-6 border-r border-border bg-muted/50">
+                            <h2 class="text-base font-semibold text-foreground mb-4 flex items-center">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2 text-muted-foreground"></i>
+                                Initiating Prompt Details
+                            </h2>
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <img class="inline-block h-9 w-9 rounded-full flex-shrink-0" src="https://via.placeholder.com/100/94A3B8/FFFFFF?text=X" alt="UserX Avatar">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-foreground">UserX</p>
+                                        <p class="text-xs text-muted-foreground">Posted <time datetime="2023-10-27T10:00:00Z">Just now</time></p>
+                                    </div>
+                                </div>
+                                <blockquote class="border-l-4 border-border pl-4 text-foreground text-sm py-2 bg-background rounded-r-md">
+                                    <p x-text="promptMessage"></p>
+                                </blockquote>
+                                <div class="text-xs text-muted-foreground space-y-1 pt-2">
+                                    <div class="flex items-center"> <i data-lucide="tag" class="w-3.5 h-3.5 mr-1.5"></i> Tags: <span class="ml-1 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">#AI</span> <span class="ml-1 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">#Mastodon</span> </div>
+                                     <div class="flex items-center"> <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5"></i> Intent: <span class="ml-1 font-medium text-foreground">Content Generation</span></div>
+                                      <div class="flex items-center"> <i data-lucide="settings-2" class="w-3.5 h-3.5 mr-1.5"></i> Model: <span class="ml-1 font-medium text-foreground">Default Creative</span></div>
+                                </div>
+                             </div>
+                        </div>
+
+                        <!-- Right Panel: AI Processing Steps -->
+                        <div class="md:w-3/5 p-6">
+                             <h2 class="text-base font-semibold text-foreground mb-4 flex items-center">
+                                <i data-lucide="list-checks" class="w-4 h-4 mr-2 text-teal-600"></i>
+                                Agent Processing Sequence
+                            </h2>
+
+                            <div class="space-y-3 min-h-[350px] flex flex-col">
+                                <div x-show="!processing && processedSteps.length === 0 && !finalOutput" class="flex-grow flex flex-col items-center justify-center text-muted-foreground text-center p-6">
+                                     <i data-lucide="loader-2" class="w-6 h-6 mb-3 text-muted-foreground animate-spin"></i>
+                                    <span class="text-sm">Initializing sequence... Please wait.</span>
+                                </div>
+
+                                <!-- AI Steps Template -->
+                                <template x-for="(step, index) in processedSteps" :key="index">
+                                    <div class="flex items-start p-3 border bg-background rounded-md shadow-sm transition-all duration-300 ease-in-out"
+                                         :class="{
+                                             'border-l-4 border-teal-500': step.status === 'complete',
+                                             'border-l-4 border-blue-500 opacity-100': step.status === 'processing', // No pulse, just border
+                                             'border-l-4 border-border opacity-70': step.status === 'pending'
+                                            }"
+                                         x-show="currentStep >= index"
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 transform translate-y-1"
+                                         x-transition:enter-end="opacity-100 transform translate-y-0">
+
+                                        <div class="mr-3 flex-shrink-0 pt-1">
+                                            <span x-show="step.status === 'complete'" class="text-teal-600"> <i data-lucide="check-circle" class="w-4 h-4"></i> </span>
+                                            <span x-show="step.status === 'processing'" class="text-blue-600"> <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> </span>
+                                            <span x-show="step.status === 'pending'" class="text-muted-foreground"> <i :data-lucide="step.icon || 'circle-dashed'" class="w-4 h-4"></i> </span>
+                                        </div>
+
+                                        <div class="flex-grow">
+                                            <div class="flex justify-between items-center">
+                                                <p class="font-medium text-sm text-foreground" x-text="step.title"></p>
+                                                <span x-show="step.status === 'complete'" class="text-xs text-muted-foreground" x-text="`(${step.duration || 0}ms)`"></span>
+                                                <span x-show="step.status === 'processing'" class="text-xs text-blue-600">Running...</span>
+                                            </div>
+                                            <p class="text-sm text-muted-foreground mt-0.5" x-text="step.description"></p>
+                                            <p x-show="step.details" class="text-xs text-muted-foreground mt-1 p-1.5 bg-muted rounded border border-border" x-text="step.details"></p>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Final Output Panel -->
+                                <div x-show="finalOutput"
+                                     class="mt-4 p-4 border border-green-300 rounded-md bg-green-50/60 ring-1 ring-green-100"
+                                     x-transition:enter="transition ease-out duration-500"
+                                     x-transition:enter-start="opacity-0 scale-95"
+                                     x-transition:enter-end="opacity-100 scale-100">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="text-base font-semibold text-green-800 flex items-center">
+                                            <i data-lucide="check-check" class="w-5 h-5 mr-2 text-green-700"></i>
+                                            Response Generated
+                                        </h3>
+                                        <span class="text-xs text-green-700">Total time: <span x-text="totalDuration"></span>ms</span>
+                                    </div>
+                                    <div class="p-3 bg-background border border-border rounded-md shadow-inner">
+                                         <p class="text-sm text-foreground whitespace-pre-wrap" x-text="finalOutput"></p>
+                                    </div>
+                                    <div class="flex items-center space-x-2 mt-4 pt-3 border-t border-green-200">
+                                        <button class="btn btn-primary btn-sm"> <i data-lucide="send" class="w-4 h-4 mr-1.5"></i> Post </button>
+                                        <button class="btn btn-secondary btn-sm"> <i data-lucide="copy" class="w-4 h-4 mr-1.5"></i> Copy </button>
+                                        <button class="btn btn-outline btn-sm"> <i data-lucide="edit-3" class="w-4 h-4 mr-1.5"></i> Edit </button>
+                                        <div class="flex-grow"></div>
+                                         <button class="btn btn-ghost btn-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10"> <i data-lucide="refresh-ccw" class="w-4 h-4 mr-1.5"></i> Regenerate </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Status Bar Footer -->
+            <footer class="flex h-8 items-center text-xs border-t bg-background px-4 text-muted-foreground">
+                 <div class="flex items-center gap-1"> <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-600"></i> Status: <span class="font-medium text-foreground" x-text="processing ? 'Processing...' : (finalOutput ? 'Complete' : 'Idle')">Idle</span> </div>
+                <div class="mx-4 border-l h-4 border-border"></div>
+                <div class="flex items-center gap-1"> <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Model: <span class="font-medium text-foreground">Default Creative V2</span> </div>
+                <div class="flex-1 text-right" x-data="{ currentTime: new Date().toLocaleTimeString() }" x-init="setInterval(() => { currentTime = new Date().toLocaleTimeString() }, 1000)">
+                    <span x-text="currentTime"></span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        function aiInteractionPanel() {
+            return {
+                promptMessage: "Draft a short, engaging toot about the recent advancements in open-source AI models. Mention potential benefits for the Mastodon community.",
+                processing: false,
+                aiStepsDefinition: [
+                    { id: 1, icon: 'scan-text', title: 'Analyzing Prompt', description: 'Identifying keywords, entities, and overall intent.', status: 'pending', details: '', duration: 650 },
+                    { id: 2, icon: 'database-zap', title: 'Knowledge Retrieval', description: 'Querying vector DB for relevant context and news.', status: 'pending', details: '', duration: 1150 },
+                    { id: 3, icon: 'brain-circuit', title: 'Drafting Initial Response', description: 'Generating content based on prompt and retrieved data.', status: 'pending', details: '', duration: 1600 },
+                    { id: 4, icon: 'feather', title: 'Refining & Formatting', description: 'Adjusting tone, adding hashtags, ensuring Mastodon constraints.', status: 'pending', details: '', duration: 900 },
+                    { id: 5, icon: 'shield-check', title: 'Safety & Quality Check', description: 'Running checks for harmful content and coherence.', status: 'pending', details: '', duration: 550 },
+                    { id: 6, icon: 'package-check', title: 'Final Output Assembly', description: 'Preparing the final structured response.', status: 'pending', details: '', duration: 350 }
+                ],
+                processedSteps: [],
+                currentStep: -1,
+                finalOutput: '',
+                totalDuration: 0,
+
+                startProcessingSequence() {
+                    // Reset state if already ran
+                    if (this.processedSteps.length > 0 || this.finalOutput) {
+                        this.processing = false;
+                        this.finalOutput = '';
+                        this.processedSteps = [];
+                        this.currentStep = -1;
+                        this.totalDuration = 0;
+                        // Give UI time to reset before restarting
+                        this.$nextTick(() => {
+                             setTimeout(() => this.initiateSequence(), 50);
+                        });
+                    } else {
+                         this.initiateSequence();
+                    }
+                },
+
+                initiateSequence() {
+                     if (this.processing) return;
+                    this.processing = true;
+                    this.processedSteps = JSON.parse(JSON.stringify(this.aiStepsDefinition)).map(step => ({ ...step, status: 'pending', details: '' }));
+                    this.currentStep = -1;
+                    this.totalDuration = 0;
+
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        this.processNextStep();
+                    });
+                },
+
+                processNextStep() {
+                    if (this.currentStep >= 0 && this.currentStep < this.processedSteps.length) {
+                        const completedStep = this.processedSteps[this.currentStep];
+                        completedStep.status = 'complete';
+                        this.totalDuration += completedStep.duration || 0; // Accumulate duration
+
+                         // Add dynamic details examples
+                        if (completedStep.id === 1) { completedStep.details = `Intent: Generate Toot | Keywords: open-source, AI, Mastodon`; }
+                        if (completedStep.id === 2) { completedStep.details = 'Retrieved 3 docs, relevance > 0.85'; }
+                        if (completedStep.id === 4) { completedStep.details = 'Added: #OpenSourceAI, #Fediverse. Length: 275 chars.'; }
+                         if (completedStep.id === 5) { completedStep.details = 'Toxicity score: 0.05 | Coherence: 0.92'; }
+
+                         // Force Alpine to update the array for reactivity if needed (sometimes complex updates need help)
+                        // this.processedSteps = [...this.processedSteps];
+                    }
+
+                    this.currentStep++;
+
+                    if (this.currentStep < this.processedSteps.length) {
+                        const step = this.processedSteps[this.currentStep];
+                        step.status = 'processing';
+
+                        this.$nextTick(() => { lucide.createIcons(); });
+
+                        setTimeout(() => {
+                            if (this.processing && this.processedSteps[this.currentStep]?.status === 'processing') {
+                                this.processNextStep();
+                            }
+                        }, step.duration || 1000);
+
+                    } else {
+                        this.generateFinalOutput();
+                        this.processing = false;
+                        this.$nextTick(() => { lucide.createIcons(); });
+                    }
+                },
+
+                generateFinalOutput() {
+                    this.finalOutput = `Exciting times for open-source AI! 🚀 Recent models offer more transparency & community control. Great potential for cool tools and bots right here on the Fediverse! What benefits do you see?\n\n#OpenSourceAI #AI #Fediverse #Mastodon`;
+                },
+
+                init() {
+                     // Automatically start sequence on load via x-init in HTML
+                     this.$nextTick(() => { lucide.createIcons(); });
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

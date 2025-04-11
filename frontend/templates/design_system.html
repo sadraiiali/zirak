@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastodon AI Bot - Design System v1.3 (with Code Tabs)</title>
+    <!-- CDNs -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <!-- Tailwind with Forms & Typography -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script> <!-- Alpine.js -->
+    <script src="https://unpkg.com/lucide@latest"></script> <!-- Lucid Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> <!-- Anime.js -->
+
+    <!-- Monaco Editor CDN -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main"
+        href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/editor/editor.main.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.min.js"></script>
+
+
+    <style>
+        /* --- Same CSS Variables and Base Styles as Previous Version --- */
+        :root {
+            --background: 0 0% 100%;
+            /* white */
+            --foreground: 222.2 84% 4.9%;
+            /* slate-950 */
+            --muted: 210 40% 96.1%;
+            /* slate-100 */
+            --muted-foreground: 215.4 16.3% 46.9%;
+            /* slate-500 */
+            --card: 0 0% 100%;
+            /* white */
+            --card-foreground: 222.2 84% 4.9%;
+            /* slate-950 */
+            --border: 214.3 31.8% 91.4%;
+            /* slate-200 */
+            --input: 214.3 31.8% 91.4%;
+            /* slate-200 */
+            --primary: 221.2 83.2% 53.3%;
+            /* indigo-600 */
+            --primary-foreground: 210 40% 98%;
+            /* slate-50 */
+            --secondary: 210 40% 96.1%;
+            /* slate-100 */
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            /* slate-900 */
+            --accent: 210 40% 96.1%;
+            /* slate-100 */
+            --accent-foreground: 222.2 47.4% 11.2%;
+            /* slate-900 */
+            --destructive: 0 84.2% 60.2%;
+            /* red-600 */
+            --destructive-foreground: 210 40% 98%;
+            /* slate-50 */
+            --ring: 221.2 83.2% 53.3%;
+            /* indigo-500 */
+            --radius: 0.5rem;
+        }
+
+        /* Use CSS variables */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: hsl(var(--muted));
+            color: hsl(var(--foreground));
+            font-family: Inter, sans-serif;
+        }
+
+        .bg-background {
+            background-color: hsl(var(--background));
+        }
+
+        .bg-card {
+            background-color: hsl(var(--card));
+        }
+
+        .bg-muted {
+            background-color: hsl(var(--muted));
+        }
+
+        .bg-primary {
+            background-color: hsl(var(--primary));
+        }
+
+        .bg-secondary {
+            background-color: hsl(var(--secondary));
+        }
+
+        .bg-accent {
+            background-color: hsl(var(--accent));
+        }
+
+        .text-foreground {
+            color: hsl(var(--foreground));
+        }
+
+        .text-muted-foreground {
+            color: hsl(var(--muted-foreground));
+        }
+
+        .text-primary {
+            color: hsl(var(--primary));
+        }
+
+        .text-primary-foreground {
+            color: hsl(var(--primary-foreground));
+        }
+
+        .text-secondary-foreground {
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .text-accent-foreground {
+            color: hsl(var(--accent-foreground));
+        }
+
+        .border-border {
+            border-color: hsl(var(--border));
+        }
+
+        .ring-ring {
+            --tw-ring-color: hsl(var(--ring));
+        }
+
+        .rounded-lg {
+            border-radius: var(--radius);
+        }
+
+        .rounded-md {
+            border-radius: calc(var(--radius) - 2px);
+        }
+
+        .rounded-sm {
+            border-radius: calc(var(--radius) - 4px);
+        }
+
+        @import url('https://rsms.me/inter/inter.css');
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--border));
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsl(var(--muted-foreground));
+        }
+
+        ::-webkit-scrollbar-track {
+            background: hsl(var(--muted));
+            border-radius: 3px;
+        }
+
+        .btn {
+            @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+        }
+
+        .btn-primary {
+            @apply bg-primary text-primary-foreground hover:bg-primary/90;
+        }
+
+        .btn-secondary {
+            @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+        }
+
+        .btn-ghost {
+            @apply hover:bg-accent hover:text-accent-foreground;
+        }
+
+        .btn-outline {
+            @apply border border-border bg-background hover:bg-accent hover:text-accent-foreground;
+        }
+
+        .btn-md {
+            @apply h-10 px-4 py-2;
+        }
+
+        .btn-sm {
+            @apply h-9 rounded-md px-3;
+        }
+
+        .btn-xs {
+            @apply h-8 rounded-md px-2.5 text-xs;
+        }
+
+        .btn-icon {
+            @apply h-10 w-10;
+        }
+
+        .btn-icon-sm {
+            @apply h-9 w-9;
+        }
+
+        .btn-icon-xs {
+            @apply h-8 w-8;
+        }
+
+        .card {
+            @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+        }
+
+        .antialiased {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Basic Tooltip */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 12px;
+            padding: 4px 8px;
+            background-color: hsl(var(--foreground));
+            color: hsl(var(--background));
+            border-radius: 4px;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            white-space: nowrap;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            animation: tooltip-fade-in 0.15s 0.3s ease-in-out forwards;
+        }
+
+        @keyframes tooltip-fade-in {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Style for prompt/message text within blobs */
+        .message-blob-text {
+            @apply block w-full whitespace-pre-wrap break-words text-sm font-mono text-foreground;
+        }
+
+        /* Transition for max-height */
+        .max-h-0 {
+            max-height: 0;
+        }
+
+        .max-h-screen-half {
+            max-height: 50vh;
+        }
+
+        .transition-max-height {
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        /* Styling for code blocks in prose */
+        .prose pre {
+            @apply bg-muted border border-border rounded-md p-4 text-sm text-foreground overflow-x-auto shadow-inner;
+        }
+
+        .prose code:not(pre > code) {
+            @apply bg-muted text-sm font-mono px-1 py-0.5 rounded-sm border border-border text-primary/90;
+        }
+
+        .prose pre code {
+            @apply bg-transparent border-none p-0 text-inherit font-inherit text-sm;
+        }
+
+        /* Tab button styling */
+        .tab-button {
+            @apply px-4 py-2 -mb-px text-sm font-medium focus:outline-none transition-colors duration-150;
+        }
+        .tab-button-active {
+             @apply border-b-2 border-primary text-primary;
+        }
+        .tab-button-inactive {
+            @apply border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border;
+        }
+
+        /* Monaco editor container needs explicit height */
+        .monaco-editor-container {
+            min-height: 200px; /* Adjust as needed */
+            height: 300px; /* Example height */
+        }
+    </style>
+</head>
+
+<body class="antialiased" x-data="designSystemPage()" x-init="init()">
+    <div class="flex h-screen overflow-hidden bg-muted">
+
+        <!-- Icon-Only Sidebar (Same as before) -->
+        <aside class="hidden md:flex md:flex-shrink-0">
+            <div class="flex w-16 flex-col items-center border-r border-border bg-background py-4">
+                <!-- Sidebar content... -->
+                <div class="flex flex-shrink-0 items-center justify-center h-10 w-10 mb-6"
+                    data-tooltip="Mastodon AI Design System">
+                    <i data-lucide="palette" class="h-7 w-7 text-primary"></i>
+                </div>
+                <nav class="flex flex-col items-center flex-1 space-y-2 mt-2">
+                    <a href="#overview"
+                        class="nav-link relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        aria-current="page" data-tooltip="Overview">
+                        <i data-lucide="book-open" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#foundations"
+                        class="nav-link relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Foundations">
+                        <i data-lucide="layers" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#layout"
+                        class="nav-link relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Layout">
+                        <i data-lucide="layout-template" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#components"
+                        class="nav-link relative text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center justify-center rounded-md h-10 w-10 text-sm font-medium"
+                        data-tooltip="Components">
+                        <i data-lucide="puzzle" class="h-5 w-5"></i>
+                    </a>
+                </nav>
+                <div class="mt-auto flex flex-shrink-0 items-center justify-center pt-4">
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="relative group block"
+                        data-tooltip="View on GitHub">
+                        <i data-lucide="github"
+                            class="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-1 flex-col overflow-hidden">
+            <!-- Header/Toolbar -->
+            <header
+                class="flex h-14 items-center gap-4 border-b border-border bg-background px-6 sticky top-0 z-30 flex-shrink-0">
+                <!-- Header content... -->
+                 <h1
+                    class="text-lg font-semibold text-foreground flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    Design System - Mastodon AI Bot</h1>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="text-sm text-muted-foreground">Version 1.3</span>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main id="main-scroll-area"
+                class="flex-1 overflow-y-auto p-6 lg:p-8 prose prose-slate max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-code:before:content-none prose-code:after:content-none prose-table:border prose-table:border-collapse prose-th:p-2 prose-th:border prose-th:border-border prose-td:p-2 prose-td:border prose-td:border-border">
+                <div class="max-w-5xl mx-auto space-y-16">
+
+                    <!-- Overview, Foundations, Layout Sections (Same as before) -->
+                    <section id="overview">
+                         <h2
+                            class="flex items-center gap-2 not-prose text-2xl font-semibold border-b border-border pb-2 mb-6">
+                            <i data-lucide="book-open" class="w-5 h-5 text-primary"></i>Overview & Philosophy
+                        </h2>
+                        <!-- Overview content... -->
+                         <p class="lead text-muted-foreground">This document outlines the design system for the Mastodon
+                            AI Bot Interaction View. It prioritizes a minimalist aesthetic, effective data density
+                            management, and consistency through utility-first styling and theming.</p>
+                        <h3 class="text-xl font-semibold mt-6 mb-3">Core Principles</h3>
+                        <ul class="list-disc space-y-2 pl-5 text-muted-foreground">
+                            <li><strong>Minimalist Aesthetic:</strong> Clean, uncluttered interface.</li>
+                            <li><strong>Data Density Management:</strong> Use progressive disclosure (collapse, modal)
+                                for complex data ("داده های زیادی تو یه صفحه هس").</li>
+                            <li><strong>Utility-First:</strong> Leverage Tailwind CSS.</li>
+                            <li><strong>Themed & Consistent:</strong> Use CSS variables (Shadcn UI inspired).</li>
+                            <li><strong>Interactive & Responsive:</strong> Use Alpine.js for dynamic behavior.</li>
+                        </ul>
+                        <h3 class="text-xl font-semibold mt-6 mb-3">Technology Stack</h3>
+                        <ul class="list-disc space-y-2 pl-5 text-muted-foreground">
+                            <li><strong>Styling:</strong> Tailwind CSS (v3.x) w/ Forms, Typography plugins.</li>
+                            <li><strong>Interactivity:</strong> Alpine.js (v3.x).</li>
+                            <li><strong>Icons:</strong> Lucid Icons.</li>
+                            <li><strong>Animation:</strong> Anime.js (Available, usage TBD).</li>
+                            <li><strong>Font:</strong> Inter.</li>
+                            <li><strong>Code Editor:</strong> Monaco Editor (via CDN).</li> <!-- Added -->
+                        </ul>
+                    </section>
+
+                    <section id="foundations">
+                         <h2
+                            class="flex items-center gap-2 not-prose text-2xl font-semibold border-b border-border pb-2 mb-6">
+                            <i data-lucide="layers" class="w-5 h-5 text-primary"></i>Foundations
+                        </h2>
+                        <!-- Foundations content... -->
+                        <p>Core styles like colors, typography, borders, and spacing.</p>
+                        <h3 class="text-xl font-semibold mt-6 mb-3">Colors</h3>
+                        <p>Defined via CSS variables (e.g., <code>--primary</code>, <code>--muted-foreground</code>).
+                            Applied via utility classes (e.g., <code>bg-primary</code>,
+                            <code>text-muted-foreground</code>).
+                        </p>
+                        <div class="not-prose grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
+                             <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1" style="background-color: hsl(var(--primary))">
+                                </div><code class="text-xs">--primary</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1"
+                                    style="background-color: hsl(var(--secondary))"></div><code
+                                    class="text-xs">--secondary</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1 border border-border"
+                                    style="background-color: hsl(var(--background))"></div><code
+                                    class="text-xs">--background</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1"
+                                    style="background-color: hsl(var(--foreground))"></div><code
+                                    class="text-xs">--foreground</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1 border border-border"
+                                    style="background-color: hsl(var(--card))"></div><code class="text-xs">--card</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1" style="background-color: hsl(var(--muted))">
+                                </div><code class="text-xs">--muted</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1"
+                                    style="background-color: hsl(var(--muted-foreground))"></div><code
+                                    class="text-xs">--muted-foreground</code>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full h-16 rounded-md mb-1" style="background-color: hsl(var(--border))">
+                                </div><code class="text-xs">--border</code>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="layout">
+                         <h2
+                            class="flex items-center gap-2 not-prose text-2xl font-semibold border-b border-border pb-2 mb-6">
+                            <i data-lucide="layout-template" class="w-5 h-5 text-primary"></i>Layout
+                        </h2>
+                        <!-- Layout content... -->
+                         <p>Standard dashboard layout using Flexbox: Sidebar (optional), Header, Scrollable Main Content,
+                            Footer.</p>
+                        <div class="card mt-4 overflow-hidden not-prose">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgODAwIDQwMCI+CiAgICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iaHNsKDIxMCA0MCUgOTYuMSUpIiAvPgogICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjQwMCIgZmlsbD0iaHNsKDAgMCUgMTAwJSkiIC8+CiAgICA8cmVjdCB4PSI2NCIgeT0iMCIgd2lkdGg9IjczNiIgaGVpZ2h0PSI1NiIgZmlsbD0iaHNsKDAgMCUgMTAwJSkiIC8+CiAgICA8cmVjdCB4PSI2NCIgeT0iMzY4IiB3aWR0aD0iNzM2IiBoZWlnaHQ9IjMyIiBmaWxsPSJoc2woMC concentrationMTAwJSkiIC8+CiAgICA8cmVjdCB4PSI2NCIgeT0iNTYiIHdpZHRoPSI3MzYiIGhlaWdodD0iMzEyIiBmaWxsPSJoc2woMjEwIDQwJSA5OCUpIiAvPgogICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iaHNsKDIxNC4zIDMxLjglIDkxLjQlKSIgc3Ryb2tlLXdpZHRoPSIxIiAvPgogICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjQwMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJoc2woMjE0LjMgMzEuOCUgOTEuNCUpIiBzdHJva2Utd2lkdGg9IjEiIC8+CiAgICA8cmVjdCB4PSI2NCIgeT0iMCIgd2lkdGg9IjczNiIgaGVpZ2h0PSI1NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJoc2woMjE0LjMgMzEuOCUgOTEuNCUpIiBzdHJva2Utd2lkdGg9IjEiIC8+CiAgICA8cmVjdCB4PSI2NCIgeT0iMzY4IiB3aWR0aD0iNzM2IiBoZWlnaHQ9IjMyIiBmaWxsPSJub25lIiBzdHJva2U9ImhzbCgyMTQuMyAzMS44JSA5MS40JSkiIHN0cm9rZS13aWR0aD0iMSIgLz4KICAgIDx0ZXh0IHg9IjMyIiB5PSIyMCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9ImhzbCgyMTUuNCAxNi4zJSA0Ni45JSkiPkFzaWRlPC90ZXh0PgogICAgPHRleHQgeD0iNDE4IiB5PSIzMCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9ImhzbCgyMTUuNCAxNi4zJSA0Ni45JSkiPkhlYWRlcjwvdGV4dD4KICAgIDx0ZXh0IHg9IjQxOCIgeT0iMjE2IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iaHNsKDIxNS40IDE2LjMlIDQ2LjklKSI+TWFpbiBDb250ZW50PC90ZXh0PgogICAgPHRleHQgeD0iNDE4IiB5PSIzODUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJoc2woMjE1LjQgMTYuMyUgNDYuOSUpIj5Gb290ZXI8L3RleHQ+Cjwvc3ZnPg=="
+                                alt="Layout Diagram" class="w-full h-auto" />
+                        </div>
+                    </section>
+
+                    <!-- Components Section -->
+                    <section id="components">
+                        <h2
+                            class="flex items-center gap-2 not-prose text-2xl font-semibold border-b border-border pb-2 mb-6">
+                            <i data-lucide="puzzle" class="w-5 h-5 text-primary"></i>Components
+                        </h2>
+
+                        <!-- Component: Buttons -->
+                        <div x-data="{ activeTab: 'preview', componentId: 'buttons' }" class="mb-12">
+                             <h3 class="text-xl font-semibold mt-10 mb-3">4.1 Buttons</h3>
+                             <p>Used for actions. Base class: <code>.btn</code>. Variants modify appearance.</p>
+
+                             <!-- Tabs -->
+                            <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+
+                             <!-- Tab Content -->
+                             <div>
+                                 <!-- Preview Tab -->
+                                 <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 not-prose space-y-4">
+                                        <h4 class="text-base font-medium mb-2">Variants & Sizes</h4>
+                                        <div class="flex flex-wrap gap-3 items-center">
+                                            <button class="btn btn-primary btn-md">Primary MD</button>
+                                            <button class="btn btn-secondary btn-md">Secondary MD</button>
+                                            <button class="btn btn-outline btn-md">Outline MD</button>
+                                            <button class="btn btn-ghost btn-md">Ghost MD</button>
+                                        </div>
+                                        <div class="flex flex-wrap gap-3 items-center">
+                                            <button class="btn btn-primary btn-sm">Primary SM</button>
+                                            <button class="btn btn-secondary btn-sm">Secondary SM</button>
+                                            <button class="btn btn-outline btn-sm">Outline SM</button>
+                                            <button class="btn btn-ghost btn-sm">Ghost SM</button>
+                                        </div>
+                                        <div class="flex flex-wrap gap-3 items-center">
+                                            <button class="btn btn-primary btn-xs">Primary XS</button>
+                                            <button class="btn btn-secondary btn-xs">Secondary XS</button>
+                                            <button class="btn btn-outline btn-xs">Outline XS</button>
+                                            <button class="btn btn-ghost btn-xs">Ghost XS</button>
+                                        </div>
+                                        <h4 class="text-base font-medium mt-4 mb-2">With Icons</h4>
+                                        <div class="flex flex-wrap gap-3 items-center">
+                                            <button class="btn btn-primary btn-sm"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i>
+                                                New</button>
+                                            <button class="btn btn-outline btn-sm"><i data-lucide="play" class="w-4 h-4 mr-1.5"></i>
+                                                Run Again</button>
+                                            <button class="btn btn-secondary btn-sm"><i data-lucide="loader-2"
+                                                    class="w-4 h-4 mr-1.5 animate-spin"></i> Loading</button>
+                                        </div>
+                                        <h4 class="text-base font-medium mt-4 mb-2">Icon Buttons</h4>
+                                        <div class="flex flex-wrap gap-3 items-center">
+                                            <button class="btn btn-primary btn-icon"><i data-lucide="plus"></i></button>
+                                            <button class="btn btn-outline btn-icon-sm"><i data-lucide="trash-2"></i></button>
+                                            <button class="btn btn-ghost btn-icon-xs"><i data-lucide="settings"></i></button>
+                                        </div>
+                                        <h4 class="text-base font-medium mt-4 mb-2">Disabled State</h4>
+                                        <div class="flex flex-wrap gap-3 items-center">
+                                            <button class="btn btn-primary btn-sm" disabled>Disabled</button>
+                                            <button class="btn btn-outline btn-sm" disabled><i data-lucide="play"
+                                                    class="w-4 h-4 mr-1.5"></i> Disabled</button>
+                                        </div>
+                                    </div>
+                                    <h4 class="text-base font-semibold mt-4 mb-2">Usage Example Code:</h4>
+                                    <!-- Keep original PRE for reference if needed, but hide it from prose processing -->
+                                    <div class="not-prose">
+                                        <pre><code class="language-html"><button class="btn btn-primary btn-sm">
+  <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Button Text
+</button></code></pre>
+                                    </div>
+                                 </div>
+
+                                 <!-- Code Tab -->
+                                 <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                     <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                     <!-- Hidden code source for Monaco -->
+                                     <pre x-ref="codeSource_buttons" class="hidden"><code class="language-html"><!-- Basic Button -->
+<button class="btn btn-primary btn-md">Primary MD</button>
+
+<!-- Button with Icon -->
+<button class="btn btn-primary btn-sm">
+  <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> New
+</button>
+
+<!-- Icon Button -->
+<button class="btn btn-outline btn-icon-sm">
+  <i data-lucide="trash-2"></i>
+</button>
+
+<!-- Disabled Button -->
+<button class="btn btn-primary btn-sm" disabled>Disabled</button>
+
+<!-- Different Variants/Sizes -->
+<button class="btn btn-secondary btn-md">Secondary MD</button>
+<button class="btn btn-outline btn-sm">Outline SM</button>
+<button class="btn btn-ghost btn-xs">Ghost XS</button>
+                                    </code></pre>
+                                </div>
+                             </div>
+                        </div>
+
+                        <!-- Component: Cards -->
+                         <div x-data="{ activeTab: 'preview', componentId: 'cards' }" class="mb-12">
+                            <h3 class="text-xl font-semibold mt-10 mb-3">4.2 Cards</h3>
+                            <p>Container for grouping related content. Base class: <code>.card</code>.</p>
+
+                            <!-- Tabs -->
+                            <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+
+                            <!-- Tab Content -->
+                            <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 mt-4 not-prose">
+                                        <h4 class="text-base font-medium mb-4">Example</h4>
+                                        <div class="card max-w-md">
+                                            <div class="p-6">
+                                                <h2 class="text-lg font-semibold text-card-foreground mb-1">Card Title</h2>
+                                                <p class="text-sm text-muted-foreground">This is content inside a card component. Use padding utilities (e.g., <code>p-6</code>) for spacing.</p>
+                                            </div>
+                                            <div class="p-4 bg-muted/50 border-t border-border">
+                                                <button class="btn btn-secondary btn-sm">Card Action</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="text-base font-semibold mt-4 mb-2">Usage Example Code:</h4>
+                                    <div class="not-prose">
+                                        <pre><code class="language-html"><div class="card">
+  <div class="p-6">
+    <!-- Card Header/Content -->
+  </div>
+  <div class="p-4 border-t border-border">
+    <!-- Card Footer -->
+  </div>
+</div></code></pre>
+                                    </div>
+                                </div>
+
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                    <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                     <!-- Hidden code source -->
+                                     <pre x-ref="codeSource_cards" class="hidden"><code class="language-html"><div class="card max-w-md">
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-card-foreground mb-1">Card Title</h2>
+    <p class="text-sm text-muted-foreground">This is content inside a card component. Use padding utilities (e.g., <code>p-6</code>) for spacing.</p>
+  </div>
+  <div class="p-4 bg-muted/50 border-t border-border">
+    <button class="btn btn-secondary btn-sm">Card Action</button>
+  </div>
+</div></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Component: Tags / Badges -->
+                        <div x-data="{ activeTab: 'preview', componentId: 'tags' }" class="mb-12">
+                            <h3 class="text-xl font-semibold mt-10 mb-3">4.3 Tags / Badges</h3>
+                            <p>Small inline elements for displaying status, categories, or keywords.</p>
+
+                            <!-- Tabs -->
+                            <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+
+                             <!-- Tab Content -->
+                            <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 mt-4 not-prose">
+                                        <h4 class="text-base font-medium mb-4">Examples</h4>
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">#AI</span>
+                                            <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">#Mastodon</span>
+                                            <span class="inline-flex items-center rounded-md bg-purple-100 px-2 py-1 text-sm font-semibold text-purple-800 shadow-sm ring-1 ring-inset ring-purple-200">Model Name</span>
+                                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Processing</span>
+                                            <span class="inline-flex items-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-800">Complete</span>
+                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">Pending</span>
+                                            <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Error</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="text-base font-semibold mt-4 mb-2">Usage Example Code:</h4>
+                                     <div class="not-prose">
+                                        <pre><code class="language-html"><span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+  Tag Text
+</span></code></pre>
+                                    </div>
+                                </div>
+
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                    <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                     <!-- Hidden code source -->
+                                     <pre x-ref="codeSource_tags" class="hidden"><code class="language-html"><span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">#AI</span>
+<span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">#Mastodon</span>
+<span class="inline-flex items-center rounded-md bg-purple-100 px-2 py-1 text-sm font-semibold text-purple-800 shadow-sm ring-1 ring-inset ring-purple-200">Model Name</span>
+<span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Processing</span>
+<span class="inline-flex items-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-800">Complete</span>
+<span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">Pending</span>
+<span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Error</span></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Component: Tables -->
+                         <div x-data="{ activeTab: 'preview', componentId: 'tables' }" class="mb-12">
+                            <h3 class="text-xl font-semibold mt-10 mb-3">4.4 Tables</h3>
+                            <p>For displaying tabular data. Basic styling applied via `prose` or manually using border/background utilities.</p>
+
+                             <!-- Tabs -->
+                            <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+
+                             <!-- Tab Content -->
+                            <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 mt-4 not-prose overflow-x-auto">
+                                        <h4 class="text-base font-medium mb-4">Example</h4>
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead class="bg-muted/50">
+                                                <tr>
+                                                    <th class="border border-border p-2 text-left font-medium text-muted-foreground">Column 1</th>
+                                                    <th class="border border-border p-2 text-left font-medium text-muted-foreground">Column 2</th>
+                                                    <th class="border border-border p-2 text-left font-medium text-muted-foreground">Column 3</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-background divide-y divide-border">
+                                                <tr>
+                                                    <td class="border border-border p-2">Row 1, Cell 1</td>
+                                                    <td class="border border-border p-2">Row 1, Cell 2</td>
+                                                    <td class="border border-border p-2">Row 1, Cell 3</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-border p-2">Row 2, Cell 1</td>
+                                                    <td class="border border-border p-2">Row 2, Cell 2</td>
+                                                    <td class="border border-border p-2">Row 2, Cell 3</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-border p-2">Row 3, Cell 1</td>
+                                                    <td class="border border-border p-2">Row 3, Cell 2</td>
+                                                    <td class="border border-border p-2">Row 3, Cell 3</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <h4 class="text-base font-semibold mt-4 mb-2">Usage (Basic Structure)</h4>
+                                    <div class="not-prose">
+                                        <pre><code class="language-html"><table class="w-full text-sm">
+  <thead class="bg-muted/50">
+    <tr>
+      <th class="p-2 border text-left">Header 1</th>
+      <!-- ... -->
+    </tr>
+  </thead>
+  <tbody class="bg-background divide-y">
+    <tr>
+      <td class="p-2 border">Data 1</td>
+      <!-- ... -->
+    </tr>
+    <!-- ... -->
+  </tbody>
+</table></code></pre>
+                                    </div>
+                                </div>
+
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                    <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                     <!-- Hidden code source -->
+                                     <pre x-ref="codeSource_tables" class="hidden"><code class="language-html"><table class="w-full text-sm border-collapse">
+    <thead class="bg-muted/50">
+        <tr>
+            <th class="border border-border p-2 text-left font-medium text-muted-foreground">Column 1</th>
+            <th class="border border-border p-2 text-left font-medium text-muted-foreground">Column 2</th>
+            <th class="border border-border p-2 text-left font-medium text-muted-foreground">Column 3</th>
+        </tr>
+    </thead>
+    <tbody class="bg-background divide-y divide-border">
+        <tr>
+            <td class="border border-border p-2">Row 1, Cell 1</td>
+            <td class="border border-border p-2">Row 1, Cell 2</td>
+            <td class="border border-border p-2">Row 1, Cell 3</td>
+        </tr>
+        <tr>
+            <td class="border border-border p-2">Row 2, Cell 1</td>
+            <td class="border border-border p-2">Row 2, Cell 2</td>
+            <td class="border border-border p-2">Row 2, Cell 3</td>
+        </tr>
+        <tr>
+            <td class="border border-border p-2">Row 3, Cell 1</td>
+            <td class="border border-border p-2">Row 3, Cell 2</td>
+            <td class="border border-border p-2">Row 3, Cell 3</td>
+        </tr>
+    </tbody>
+</table></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Component: Collapse Card -->
+                        <div x-data="{ activeTab: 'preview', componentId: 'collapse' }" class="mb-12">
+                            <h3 class="text-xl font-semibold mt-10 mb-3">4.5 Collapse Card (AI Steps)</h3>
+                             <p>Used for the AI processing sequence, showing step status and allowing expansion for details. Requires Alpine.js.</p>
+
+                             <!-- Tabs -->
+                            <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+
+                             <!-- Tab Content -->
+                             <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                     <div class="card p-6 mt-4 not-prose space-y-4">
+                                        <h4 class="text-base font-medium mb-2">Interactive Examples</h4>
+
+                                        <!-- Example: Complete State -->
+                                        <div x-data="{
+                                            step: { id: 1, title: 'Analyzing Prompt', description: 'Identifying keywords, entities, and overall intent.', details: 'Intent: Generate Toot', status: 'complete', duration: 650, icon: 'scan-text', isExpanded: false, llmCall: null },
+                                            toggleExpand() { this.step.isExpanded = !this.step.isExpanded; }
+                                        }">
+                                            <div
+                                                class="border bg-background rounded-md shadow-sm overflow-hidden border-l-4 border-teal-500">
+                                                <div class="flex items-center p-3 cursor-pointer hover:bg-accent/50"
+                                                    @click="toggleExpand()">
+                                                    <div class="mr-3 flex-shrink-0 pt-0.5">
+                                                        <span class="text-teal-600"><i data-lucide="check-circle"
+                                                                class="w-4 h-4"></i></span>
+                                                    </div>
+                                                    <div class="flex-grow">
+                                                        <p class="font-medium text-sm text-foreground" x-text="step ? step.title : ''"></p>
+                                                    </div>
+                                                    <div class="flex items-center ml-3 flex-shrink-0 space-x-3">
+                                                        <span class="text-xs text-muted-foreground"
+                                                            x-text="step && step.duration ? `(${step.duration}ms)` : '(0ms)'"></span>
+                                                        <button @click.stop="toggleExpand()"
+                                                            class="btn btn-ghost btn-icon-xs text-muted-foreground"
+                                                            title="Toggle Details">
+                                                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform"
+                                                                :class="{ 'rotate-180': step.isExpanded }"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div x-show="step.isExpanded" x-collapse class="border-t border-border bg-muted/30">
+                                                    <div class="px-3 pb-3 ml-7 pt-2 space-y-2">
+                                                        <p class="text-sm text-muted-foreground" x-text="step ? step.description : ''"></p>
+                                                        <p x-show="step.details"details"
+                                                            class="text-xs text-muted-foreground mt-1 p-1.5 bg-background rounded border border-border"
+                                                            x-text="step.details"></p>ls ? step.details : ''"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Example: Processing State with LLM Call -->
+                                        <div x-data="{
+                                            step: { id: 3, title: 'Content Generation (LLM Call)', description: 'Generating draft based on prompt and retrieved data.', details: '', status: 'processing', duration: null, icon: 'brain-circuit', isExpanded: true, llmCall: { modelUsed: 'llama3-instruct', systemPrompt: 'System prompt example...', userMessages: 'User message example...' } },
+                                            toggleExpand() { this.step.isExpanded = !this.step.isExpanded; },
+                                            openLlmModal() { $dispatch('open-llm-modal', { llmData: this.step.llmCall }) }
+                                         }">
+                                            <div
+                                                class="border bg-background rounded-md shadow-sm overflow-hidden border-l-4 border-blue-500 ring-1 ring-blue-100 shadow-md">
+                                                <div class="flex items-center p-3 cursor-pointer hover:bg-accent/50"
+                                                    @click="toggleExpand()">
+                                                    <div class="mr-3 flex-shrink-0 pt-0.5">
+                                                        <span class="text-blue-600"><i data-lucide="loader-2"
+                                                                class="w-4 h-4 animate-spin"></i></span>
+                                                    </div>
+                                                    <div class="flex-grow">
+                                                        <p class="font-medium text-sm text-foreground" x-text="step ? step.title : ''"></p>
+                                                    </div>
+                                                    <div class="flex items-center ml-3 flex-shrink-0 space-x-3">
+                                                        <button x-show="step.llmCall" @click.stop="openLlmModal()"
+                                                            class="flex flex-row items-center btn btn-xs btn-outline text-primary border-primary/50 hover:bg-primary/10"
+                                                            title="View LLM Details">
+                                                            <i data-lucide="inspect" class="w-3 h-3 mr-1"></i> <span
+                                                                class="text-sm">LLM Call</span>
+                                                        </button>
+                                                        <span class="text-xs text-blue-600">Running...</span>
+                                                        <button @click.stop="toggleExpand()"
+                                                            class="btn btn-ghost btn-icon-xs text-muted-foreground"
+                                                            title="Toggle Details">
+                                                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform"
+                                                                :class="{ 'rotate-180': step.isExpanded }"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div x-show="step.isExpanded" x-collapse class="border-t border-border bg-muted/30">
+                                                    <div class="px-3 pb-3 ml-7 pt-2 space-y-2">
+                                                        <p class="text-sm text-muted-foreground" x-text="step ? step.description : ''"></p>
+                                                        <p x-show="step.details"details"
+                                                            class="text-xs text-muted-foreground mt-1 p-1.5 bg-background rounded border border-border"
+                                                            x-text="step.details"></p>ls ? step.details : ''"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Example: Pending State -->
+                                        <div x-data="{
+                                            step: { id: 5, title: 'Safety & Quality Check', description: 'Running checks for harmful content and coherence.', details: '', status: 'pending', duration: null, icon: 'shield-check', isExpanded: false, llmCall: null },
+                                            toggleExpand() { this.step.isExpanded = !this.step.isExpanded; }
+                                         }">
+                                            <div
+                                                class="border bg-background rounded-md shadow-sm overflow-hidden border-l-4 border-border opacity-80 hover:opacity-100 transition-opacity">
+                                                <div class="flex items-center p-3 cursor-pointer hover:bg-accent/50"
+                                                    @click="toggleExpand()">
+                                                    <div class="mr-3 flex-shrink-0 pt-0.5">
+                                                        <span class="text-muted-foreground"> <i
+                                                                :data-lucide="step.icon || 'circle-dashed'" class="w-4 h-4"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex-grow">
+                                                        <p class="font-medium text-sm text-foreground" x-text="step ? step.title : ''"></p>
+                                                    </div>
+                                                    <div class="flex items-center ml-3 flex-shrink-0 space-x-3">
+                                                        <button @click.stop="toggleExpand()"
+                                                            class="btn btn-ghost btn-icon-xs text-muted-foreground"
+                                                            title="Toggle Details">
+                                                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform"
+                                                                :class="{ 'rotate-180': step.isExpanded }"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div x-show="step.isExpanded" x-collapse class="border-t border-border bg-muted/30">
+                                                    <div class="px-3 pb-3 ml-7 pt-2 space-y-2">
+                                                        <p class="text-sm text-muted-foreground" x-text="step ? step.description : ''"></p>
+                                                        <p x-show="step.details"details"
+                                                            class="text-xs text-muted-foreground mt-1 p-1.5 bg-background rounded border border-border"
+                                                            x-text="step.details"></p>ls ? step.details : ''"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                    <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                    <!-- Hidden code source -->
+                                    <pre x-ref="codeSource_collapse" class="hidden"><code class="language-html"><!-- Base Structure (requires Alpine.js and Collapse plugin) -->
+<div x-data="{ 
+    isExpanded: false,
+    step: { details: 'Additional technical details example', description: 'Description of the step goes here.' }
+}">
+    <div class="border bg-background rounded-md shadow-sm overflow-hidden border-l-4 border-border"> <!-- Adjust left border color based on status -->
+
+        <!-- Header Row -->
+        <div class="flex items-center p-3 cursor-pointer hover:bg-accent/50" @click="isExpanded = !isExpanded">
+            <!-- Status Icon -->
+            <div class="mr-3 flex-shrink-0 pt-0.5">
+                <!-- Use different icons/colors based on status -->
+                <!-- Example: Complete -->
+                <span class="text-teal-600"><i data-lucide="check-circle" class="w-4 h-4"></i></span>
+                <!-- Example: Processing -->
+                <!-- <span class="text-blue-600"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i></span> -->
+                <!-- Example: Pending -->
+                <!-- <span class="text-muted-foreground"><i data-lucide="circle-dashed" class="w-4 h-4"></i></span> -->
+                 <!-- Example: Error -->
+                <!-- <span class="text-red-600"><i data-lucide="alert-circle" class="w-4 h-4"></i></span> -->
+            </div>
+
+            <!-- Title -->
+            <div class="flex-grow">
+                <p class="font-medium text-sm text-foreground" x-text="step ? step.title : ''"></p>
+            </div>
+
+            <!-- Actions / Meta -->
+            <div class="flex items-center ml-3 flex-shrink-0 space-x-3">
+                 <!-- Optional: Duration -->
+                <span class="text-xs text-muted-foreground" x-text="step && step.duration ? `(${step.duration}ms)` : '(0ms)'"></span>
+                 <!-- Optional: LLM Button -->
+                <button @click.stop="$dispatch('open-llm-modal', { llmData: {...} })"
+                    class="flex flex-row items-center btn btn-xs btn-outline text-primary border-primary/50 hover:bg-primary/10"
+                    title="View LLM Details">
+                    <i data-lucide="inspect" class="w-3 h-3 mr-1"></i> <span class="text-sm">LLM Call</span>
+                </button>
+                 <!-- Expand/Collapse Toggle -->
+                <button @click.stop="isExpanded = !isExpanded" class="btn btn-ghost btn-icon-xs text-muted-foreground" title="Toggle Details">
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="{ 'rotate-180': isExpanded }"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Content -->
+        <div x-show="isExpanded" x-collapse class="border-t border-border bg-muted/30">
+            <div class="px-3 pb-3 ml-7 pt-2 space-y-2"> <!-- Indent content -->
+                <p class="text-sm text-muted-foreground" x-text="step ? step.description : ''"></p>
+                <p x-show="step.details" class="text-xs text-muted-foreground mt-1 p-1.5 bg-background rounded border border-border" x-text="step.details">& step.details ? step.details : ''">
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Other components (Modal, Tweets, Metadata) follow the same pattern -->
+                        <!-- ... Add similar x-data wrappers, tabs, and code panes for Modal, Tweets, Metadata ... -->
+
+                         <!-- Component: Modal -->
+                        <div x-data="{ activeTab: 'preview', componentId: 'modal' }" class="mb-12">
+                            <h3 class="text-xl font-semibold mt-10 mb-3">4.6 Modal (Popup)</h3>
+                            <p>Displays overlay content, typically for focused tasks or detailed information. Requires Alpine.js.</p>
+                            <!-- Tabs -->
+                            <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+                             <!-- Tab Content -->
+                            <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 mt-4 not-prose">
+                                        <h4 class="text-base font-medium mb-4">Interactive Example</h4>
+                                        <button @click="isModalOpen = true; modalData = null; modalType = 'example'"
+                                            class="btn btn-primary">Open Example Modal</button>
+                                        <button
+                                            @click="$dispatch('open-llm-modal', { llmData: { modelUsed: 'demo-model-from-button', systemPrompt: 'System prompt for demo.', userMessages: 'User message for demo.'} })"
+                                            class="btn btn-secondary ml-2">Open LLM Modal (Example)</button>
+                                        <p class="text-xs text-muted-foreground mt-1">Click buttons to show modals. Modal definition is at the end of the body.</p>
+                                    </div>
+                                    <h4 class="text-base font-semibold mt-4 mb-2">Usage (Conceptual Code):</h4>
+                                    <div class="not-prose">
+                                        <pre><code class="language-html"><!-- Trigger Button -->
+<button @click="isModalOpen = true">Open Modal</button>
+
+<!-- Modal Structure (within Alpine component where isModalOpen is defined) -->
+<div x-show="isModalOpen" x-trap.inert.noscroll="isModalOpen" class="fixed inset-0 z-50 ...">
+    <!-- Overlay -->
+    <div @click="isModalOpen = false" class="fixed inset-0 bg-black/60 ..." x-transition...></div>
+    <!-- Modal Content Panel -->
+    <div @click.stop class="relative bg-card rounded-lg ..." x-transition...>
+        <!-- Header, Body, Footer -->
+    </div>
+</div></code></pre>
+                                    </div>
+                                </div>
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                    <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                    <pre x-ref="codeSource_modal" class="hidden"><code class="language-html"><!-- Full Modal Structure (Place near the end of your <body>) -->
+<!-- It needs global Alpine state like isModalOpen, modalData, modalType -->
+<div x-data="{ isModalOpen: false, modalData: null, modalType: 'example' }"> <!-- Example global state -->
+
+    <!-- Trigger buttons (place these where needed in your UI) -->
+    <button @click="isModalOpen = true; modalData = null; modalType = 'example'" class="btn btn-primary">Open Example Modal</button>
+    <button @click="isModalOpen = true; modalData = { modelUsed: 'demo-model', systemPrompt: 'Demo system prompt.', userMessages: 'Demo user message.'}; modalType = 'llm';" class="btn btn-secondary ml-2">Open LLM Modal</button>
+
+
+    <!-- Modal Container -->
+    <div x-show="isModalOpen"
+        x-trap.inert.noscroll="isModalOpen"
+        @keydown.escape.window="isModalOpen = false"
+        class="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4"
+        style="display: none;"
+        x-cloak
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="modalType === 'llm' ? 'llm-modal-title' : 'example-modal-title'">
+
+        <!-- Overlay -->
+        <div x-show="isModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            @click="isModalOpen = false"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+        <!-- Modal Content Panel -->
+        <div @click.stop x-show="isModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+            class="relative w-full max-w-3xl bg-card rounded-lg shadow-xl overflow-hidden border border-border">
+
+            <!-- Content based on modalType -->
+            <template x-if="modalType === 'llm'">
+                <div>
+                    <div class="flex items-center justify-between p-4 border-b border-border">
+                        <h3 id="llm-modal-title" class="text-lg font-semibold text-foreground flex items-center">
+                            <i data-lucide="inspect" class="w-5 h-5 mr-2 text-primary"></i> LLM Call Details
+                        </h3>
+                        <button @click="isModalOpen = false" class="btn btn-ghost btn-icon-sm text-muted-foreground hover:bg-accent" aria-label="Close modal">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                        <!-- LLM Details rendering -->
+                        <template x-if="modalData">
+                             <div class="space-y-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">Model Used:</label>
+                                    <span class="inline-flex items-center rounded-md bg-purple-100 px-2.5 py-1 text-sm font-semibold text-purple-800 shadow-sm ring-1 ring-inset ring-purple-200" x-text="modalData.modelUsed"></span>Used ? modalData.modelUsed : ''"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">System Prompt:</label>
+                                    <div class="bg-muted border border-border rounded-lg p-4 shadow-inner max-h-40 overflow-y-auto">
+                                        <p class="message-blob-text" x-text="modalData.systemPrompt"></p>mPrompt ? modalData.systemPrompt : ''"></p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">User Message(s):</label>
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-inner max-h-40 overflow-y-auto">
+                                        <p class="message-blob-text !text-blue-900" x-text="modalData.userMessages"></p>essages ? modalData.userMessages : ''"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!modalData">
+                            <p class="text-muted-foreground">No LLM data available.</p>
+                        </template>
+                    </div>
+                    <div class="px-6 py-3 bg-muted border-t border-border text-right">
+                        <button @click="isModalOpen = false" class="btn btn-secondary btn-sm">Close</button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="modalType === 'example'">
+                 <div>
+                    <div class="flex items-center justify-between p-4 border-b border-border">
+                        <h3 id="example-modal-title" class="text-lg font-semibold text-foreground flex items-center">
+                            <i data-lucide="search" class="w-5 h-5 mr-2 text-primary"></i> Example Modal
+                        </h3>
+                        <button @click="isModalOpen = false" class="btn btn-ghost btn-icon-sm text-muted-foreground hover:bg-accent" aria-label="Close modal">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                        <p class="text-muted-foreground">This is the content area of the example modal.</p>
+                        <div>
+                            <label for="modal-input" class="block text-sm font-medium text-foreground mb-1">Sample Input:</label>
+                            <input type="text" id="modal-input" name="modal-input" class="block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background p-2" placeholder="Enter something...">
+                        </div>
+                    </div>
+                    <div class="px-6 py-3 bg-muted border-t border-border text-right space-x-2">
+                        <button @click="isModalOpen = false" class="btn btn-secondary btn-sm">Cancel</button>
+                        <button @click="isModalOpen = false" class="btn btn-primary btn-sm">Confirm Action</button>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+    </div>
+</div><!-- End Example Global State -->
+                                    </code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Component: "Tweets" -->
+                        <div x-data="{ activeTab: 'preview', componentId: 'tweets' }" class="mb-12">
+                            <h3 class="text-xl font-semibold mt-10 mb-3">4.7 "Tweets" (Final Output Panel)</h3>
+                            <p>Style used for displaying the final generated AI response, often with actions.</p>
+                            <!-- Tabs -->
+                             <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+                             <!-- Tab Content -->
+                            <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 mt-4 not-prose">
+                                        <h4 class="text-base font-medium mb-4">Example</h4>
+                                        <div class="mt-4 p-4 border border-green-300 rounded-lg bg-green-50/60 ring-1 ring-green-100 shadow-sm">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="text-base font-semibold text-green-800 flex items-center">
+                                                    <i data-lucide="check-check" class="w-5 h-5 mr-2 text-green-700"></i>
+                                                    Response Generated
+                                                </h3>
+                                                <span class="text-xs text-green-700">Total time: 1234ms</span>
+                                            </div>
+                                            <div class="p-3 bg-background border border-border rounded-md shadow-inner">
+                                                <p class="text-sm text-foreground whitespace-pre-wrap">Exciting times for open-source AI! 🚀 Recent models offer more transparency & community control. Great potential for cool tools and bots right here on the Fediverse! What benefits do you see?
+
+#OpenSourceAI #AI #Fediverse #Mastodon</p>
+                                            </div>
+                                            <div class="mt-4 pt-3 border-t border-green-200 flex flex-wrap gap-2 items-center justify-between">
+                                                <div class="flex flex-wrap gap-2 items-center">
+                                                    <button class="btn btn-primary btn-sm flex items-center"><i data-lucide="send" class="w-3.5 h-3.5 mr-1.5"></i> Post</button>
+                                                    <button class="btn btn-outline btn-sm flex items-center"><i data-lucide="copy" class="w-3.5 h-3.5 mr-1.5"></i> Copy</button>
+                                                    <button class="btn btn-ghost btn-sm flex items-center text-muted-foreground"><i data-lucide="edit-3" class="w-3.5 h-3.5 mr-1.5"></i> Edit</button>
+                                                </div>
+                                                <button class="btn btn-outline btn-sm flex items-center text-muted-foreground hover:text-destructive border-destructive/20 hover:border-destructive/40 hover:bg-destructive/10">
+                                                    <i data-lucide="refresh-ccw" class="w-3.5 h-3.5 mr-1.5"></i> Regenerate
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <h4 class="text-base font-semibold mt-4 mb-2">Usage</h4>
+                                    <p>Combine borders, backgrounds (<code>border-green-300</code>, <code>bg-green-50/60</code>), inner content blocks, and action buttons.</p>
+                                </div>
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                    <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                     <pre x-ref="codeSource_tweets" class="hidden"><code class="language-html"><div class="mt-4 p-4 border border-green-300 rounded-lg bg-green-50/60 ring-1 ring-green-100 shadow-sm">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-2">
+        <h3 class="text-base font-semibold text-green-800 flex items-center">
+            <i data-lucide="check-check" class="w-5 h-5 mr-2 text-green-700"></i>
+            Response Generated <!-- Or other title -->
+        </h3>
+        <span class="text-xs text-green-700">Total time: 1234ms</span> <!-- Optional meta -->
+    </div>
+
+    <!-- Content Body -->
+    <div class="p-3 bg-background border border-border rounded-md shadow-inner">
+        <p class="text-sm text-foreground whitespace-pre-wrap">Generated text content goes here...
+Line breaks are preserved.
+
+#ExampleHashtag</p>
+    </div>
+
+    <!-- Actions Footer -->
+    <div class="mt-4 pt-3 border-t border-green-200 flex flex-wrap gap-2 items-center justify-between">
+        <!-- Primary Actions -->
+        <div class="flex flex-wrap gap-2 items-center">
+            <button class="btn btn-primary btn-sm flex items-center"><i data-lucide="send" class="w-3.5 h-3.5 mr-1.5"></i> Post</button>
+            <button class="btn btn-outline btn-sm flex items-center"><i data-lucide="copy" class="w-3.5 h-3.5 mr-1.5"></i> Copy</button>
+            <button class="btn btn-ghost btn-sm flex items-center text-muted-foreground"><i data-lucide="edit-3" class="w-3.5 h-3.5 mr-1.5"></i> Edit</button>
+        </div>
+        <!-- Secondary Actions -->
+        <button class="btn btn-outline btn-sm flex items-center text-muted-foreground hover:text-destructive border-destructive/20 hover:border-destructive/40 hover:bg-destructive/10">
+            <i data-lucide="refresh-ccw" class="w-3.5 h-3.5 mr-1.5"></i> Regenerate
+        </button>
+    </div>
+</div></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                         <!-- Component: Metadata Display -->
+                        <div x-data="{ activeTab: 'preview', componentId: 'metadata' }" class="mb-12">
+                             <h3 class="text-xl font-semibold mt-10 mb-3">4.8 Metadata Display</h3>
+                            <p>Used for showing key-value pairs, often with icons, like in the prompt details section.</p>
+                             <!-- Tabs -->
+                             <div class="flex border-b border-border mb-4 mt-4">
+                                <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Preview
+                                </button>
+                                <button @click="activeTab = 'code'; $nextTick(() => initEditor(componentId))" :class="activeTab === 'code' ? 'tab-button-active' : 'tab-button-inactive'" class="tab-button">
+                                    Code
+                                </button>
+                            </div>
+                            <!-- Tab Content -->
+                            <div>
+                                <!-- Preview Tab -->
+                                <div x-show="activeTab === 'preview'" x-transition>
+                                    <div class="card p-6 mt-4 not-prose">
+                                        <h4 class="text-base font-medium mb-4">Example</h4>
+                                        <div class="space-y-2 pt-2">
+                                            <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Metadata</h3>
+                                            <div class="text-xs text-muted-foreground space-y-1.5 border border-border rounded-md p-3 bg-background/50 shadow-sm">
+                                                <div class="flex items-center"> <i data-lucide="tag" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i> Tags: <span class="ml-1.5 flex flex-wrap gap-1"><span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">#AI</span> <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">#Mastodon</span></span></div>
+                                                <div class="flex items-center"> <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i> Intent: <span class="ml-1.5 font-medium text-foreground">Generate Toot</span></div>
+                                                <div class="flex items-center"> <i data-lucide="settings-2" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i> Model: <span class="ml-1.5 font-medium text-foreground">Default Creative</span></div>
+                                                <div class="flex items-center"> <i data-lucide="calendar-clock" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i> Requested: <span class="ml-1.5 font-medium text-foreground">11/15/2023, 10:30 AM</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <h4 class="text-base font-semibold mt-4 mb-2">Usage Example Code:</h4>
+                                    <div class="not-prose">
+                                        <pre><code class="language-html"><div class="space-y-1.5 text-xs text-muted-foreground">
+  <div class="flex items-center">
+    <i data-lucide="icon-name" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i>
+    Key: <span class="ml-1.5 font-medium text-foreground">Value</span>
+  </div>
+  <!-- More items -->
+</div></code></pre>
+                                    </div>
+                                </div>
+                                <!-- Code Tab -->
+                                <div x-show="activeTab === 'code'" x-cloak x-transition>
+                                     <div :id="'editor-' + componentId" class="monaco-editor-container w-full border border-border rounded-md mt-4"></div>
+                                     <pre x-ref="codeSource_metadata" class="hidden"><code class="language-html"><div class="space-y-2 pt-2">
+    <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Metadata</h3>
+    <div class="text-xs text-muted-foreground space-y-1.5 border border-border rounded-md p-3 bg-background/50 shadow-sm">
+        <!-- Item 1: Tags (Example with complex value) -->
+        <div class="flex items-start sm:items-center">
+            <i data-lucide="tag" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0 mt-0.5 sm:mt-0"></i>
+            <span class="flex-shrink-0">Tags:</span>
+            <span class="ml-1.5 flex flex-wrap gap-1">
+                <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">#AI</span>
+                <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">#Mastodon</span>
+            </span>
+        </div>
+        <!-- Item 2: Simple Key-Value -->
+        <div class="flex items-center">
+            <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i>
+            Intent: <span class="ml-1.5 font-medium text-foreground">Generate Toot</span>
+        </div>
+        <!-- Item 3: Simple Key-Value -->
+        <div class="flex items-center">
+            <i data-lucide="settings-2" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i>
+            Model: <span class="ml-1.5 font-medium text-foreground">Default Creative</span>
+        </div>
+        <!-- Item 4: Simple Key-Value -->
+        <div class="flex items-center">
+            <i data-lucide="calendar-clock" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i>
+            Requested: <span class="ml-1.5 font-medium text-foreground">11/15/2023, 10:30 AM</span>
+        </div>
+    </div>
+</div></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </section>
+
+                </div> <!-- End Content Wrapper -->
+            </main>
+
+            <!-- Status Bar Footer (Simplified) -->
+            <footer
+                class="flex h-8 items-center text-xs border-t border-border bg-background px-4 text-muted-foreground flex-shrink-0 z-10">
+                <!-- Footer content... -->
+                <span>Mastodon AI Bot Design System - v1.3</span>
+                <div class="flex-1 text-right">
+                    <span>Powered by Tailwind, Alpine.js, Lucid Icons, Monaco Editor</span>
+                </div>
+            </footer>
+
+            <!-- Modal Container (using global state - no changes needed here) -->
+            <div x-show="isModalOpen" x-trap.inert.noscroll="isModalOpen"
+                @open-llm-modal.window="isModalOpen = true; modalData = $event.detail.llmData; modalType = 'llm';"
+                @keydown.escape.window="isModalOpen = false"
+                class="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4" style="display: none;"
+                x-cloak role="dialog" aria-modal="true"
+                :aria-labelledby="modalType === 'llm' ? 'llm-modal-title' : 'example-modal-title'">
+                <!-- Overlay -->
+                <div x-show="isModalOpen" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" @click="isModalOpen = false"
+                    class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+                <!-- Modal Content -->
+                <div @click.stop x-show="isModalOpen" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    class="relative w-full max-w-3xl bg-card rounded-lg shadow-xl overflow-hidden border border-border">
+
+                    <template x-if="modalType === 'llm'">
+                       <!-- LLM Modal Content -->
+                        <div>
+                            <div class="flex items-center justify-between p-4 border-b border-border">
+                                <h3 id="llm-modal-title"
+                                    class="text-lg font-semibold text-foreground flex items-center">
+                                    <i data-lucide="inspect" class="w-5 h-5 mr-2 text-primary"></i> LLM Call Details
+                                </h3>
+                                <button @click="isModalOpen = false"
+                                    class="btn btn-ghost btn-icon-sm text-muted-foreground hover:bg-accent"
+                                    aria-label="Close modal">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                                <template x-if="modalData">
+                                    <div class="space-y-5">
+                                        <div>
+                                            <label class="block text-sm font-medium text-foreground mb-2">Model
+                                                Used:</label>
+                                            <span
+                                                class="inline-flex items-center rounded-md bg-purple-100 px-2.5 py-1 text-sm font-semibold text-purple-800 shadow-sm ring-1 ring-inset ring-purple-200"
+                                                x-text="modalData && modalData.modelUsed ? modalData.modelUsed : ''"></span>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-foreground mb-2">System
+                                                Prompt:</label>
+                                            <div
+                                                class="bg-muted border border-border rounded-lg p-4 shadow-inner max-h-40 overflow-y-auto">
+                                                <p class="message-blob-text" x-text="modalData && modalData.systemPrompt ? modalData.systemPrompt : ''"></p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-foreground mb-2">User
+                                                Message(s):</label>
+                                            <div
+                                                class="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-inner max-h-40 overflow-y-auto">
+                                                <p class="message-blob-text !text-blue-900"
+                                                    x-text="modalData && modalData.userMessages ? modalData.userMessages : ''"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="!modalData">
+                                    <p class="text-muted-foreground">No LLM data provided for this step.</p>
+                                </template>
+                            </div>
+                            <div class="px-6 py-3 bg-muted border-t border-border text-right">
+                                <button @click="isModalOpen = false" class="btn btn-secondary btn-sm">Close</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="modalType === 'example'">
+                         <!-- Example Modal Content -->
+                        <div>
+                            <div class="flex items-center justify-between p-4 border-b border-border">
+                                <h3 id="example-modal-title"
+                                    class="text-lg font-semibold text-foreground flex items-center">
+                                    <i data-lucide="search" class="w-5 h-5 mr-2 text-primary"></i> Example Modal
+                                </h3>
+                                <button @click="isModalOpen = false"
+                                    class="btn btn-ghost btn-icon-sm text-muted-foreground hover:bg-accent"
+                                    aria-label="Close modal">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                                <p class="text-muted-foreground">This is the content area of the example modal.</p>
+                                <div>
+                                    <label for="modal-input"
+                                        class="block text-sm font-medium text-foreground mb-1">Sample Input:</label>
+                                    <input type="text" id="modal-input" name="modal-input"
+                                        class="block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background p-2"
+                                        placeholder="Enter something...">
+                                </div>
+                            </div>
+                            <div class="px-6 py-3 bg-muted border-t border-border text-right space-x-2">
+                                <button @click="isModalOpen = false" class="btn btn-secondary btn-sm">Cancel</button>
+                                <button @click="isModalOpen = false" class="btn btn-primary btn-sm">Confirm
+                                    Action</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div> <!-- End Modal -->
+
+        </div> <!-- End Main Content Area -->
+    </div> <!-- End Main Flex Container -->
+
+    <script>
+        // Added Alpine's Collapse plugin for smoother animation
+        document.addEventListener('alpine:initializing', () => {
+            Alpine.plugin(Alpine.plugins.collapse)
+        })
+
+        function designSystemPage() {
+            return {
+                isModalOpen: false,
+                modalData: null,
+                modalType: 'example',
+                monacoEditors: {}, // Store editor instances
+
+                initSmoothScroll() {
+                     document.querySelectorAll('aside nav a.nav-link').forEach(anchor => {
+                        anchor.addEventListener('click', (e) => {
+                            const targetId = anchor.getAttribute('href');
+                            if (targetId && targetId.startsWith('#')) {
+                                e.preventDefault();
+                                const targetElement = document.querySelector(targetId);
+                                const mainScrollArea = document.getElementById('main-scroll-area');
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+
+                                if (targetElement && mainScrollArea) {
+                                    const elementTop = targetElement.offsetTop - headerHeight - 20; // Adjust offset
+                                    mainScrollArea.scrollTo({ top: elementTop, behavior: 'smooth' });
+                                }
+                            }
+                        });
+                    });
+                },
+
+                // Function to initialize or get an editor instance
+                initEditor(componentId) {
+                    const editorId = `editor-${componentId}`;
+                    const container = document.getElementById(editorId);
+                    const codeSourceRef = this.$refs[`codeSource_${componentId}`]; // Use x-ref
+
+                    if (!container || !codeSourceRef) {
+                        console.error(`Cannot find editor container #${editorId} or code source ref for ${componentId}`);
+                        return;
+                    }
+
+                    // Check if editor already exists for this container
+                    if (this.monacoEditors[editorId]) {
+                         // console.log(`Editor ${editorId} already initialized.`);
+                        // Optionally ensure layout if tab was hidden
+                         this.$nextTick(() => this.monacoEditors[editorId].layout());
+                        return;
+                    }
+
+                    const codeContent = codeSourceRef.querySelector('code')?.textContent.trim() || '';
+
+                    // Ensure Monaco's require is loaded
+                    if (typeof require === 'undefined') {
+                        console.error('Monaco loader not ready.');
+                        // Maybe try again after a short delay?
+                        setTimeout(() => this.initEditor(componentId), 200);
+                        return;
+                    }
+
+                    require(['vs/editor/editor.main'], () => {
+                        try {
+                             // Destroy existing editor in this container if any (shouldn't happen with the check above, but safe)
+                             if (monaco.editor.getModels().length > 0) {
+                                const existingEditor = monaco.editor.getEditors().find(ed => ed.getDomNode() === container);
+                                if (existingEditor) {
+                                    existingEditor.dispose();
+                                }
+                            }
+
+                            console.log(`Initializing Monaco Editor for: ${editorId}`);
+                            this.monacoEditors[editorId] = monaco.editor.create(container, {
+                                value: codeContent,
+                                language: 'html',
+                                theme: 'vs-light', // Or 'vs-dark'
+                                readOnly: true,
+                                minimap: { enabled: false },
+                                automaticLayout: true, // Adjusts layout on container size changes
+                                scrollBeyondLastLine: false,
+                                wordWrap: 'on' // Wrap long lines
+                            });
+                        } catch (error) {
+                            console.error(`Error creating Monaco editor for ${editorId}:`, error);
+                            container.textContent = 'Error loading code viewer.'; // Fallback message
+                        }
+                    });
+                },
+
+                init() {
+                    console.log("Design System Page Initialized (v1.3 with Monaco)");
+                    this.initSmoothScroll();
+
+                    // Configure Monaco Loader Path
+                    // This needs to run BEFORE the first require call
+                    if (typeof require !== 'undefined') {
+                        require.config({
+                             paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' }
+                         });
+                         console.log("Monaco require paths configured.");
+                    } else {
+                        console.warn("Monaco loader (require) not found immediately. Will rely on subsequent calls.");
+                    }
+
+
+                    // Render initial icons AFTER Alpine initializes everything
+                    this.$nextTick(() => {
+                        console.log("Rendering initial icons...");
+                        lucide.createIcons();
+                    });
+
+                     // Handle modal state changes (same as before)
+                    this.$watch('isModalOpen', (isOpen) => {
+                        if (!isOpen) {
+                            this.modalData = null;
+                            this.modalType = 'example';
+                        } else {
+                            // Render icons inside the modal AFTER it becomes visible
+                            this.$nextTick(() => {
+                                const modalContent = document.querySelector('[role="dialog"] [x-show="isModalOpen"] > div > template[x-if="' + this.modalType + '"] + div'); // Target the correct visible content
+                                if (modalContent) {
+                                    console.log("Rendering icons inside modal...");
+                                    lucide.createIcons({ context: modalContent });
+                                } else {
+                                    console.warn("Could not find modal content to render icons in.");
+                                }
+                            });
+                        }
+                    });
+
+                     // Clean up editors on page unload (optional but good practice)
+                     window.addEventListener('beforeunload', () => {
+                        Object.values(this.monacoEditors).forEach(editor => editor.dispose());
+                        this.monacoEditors = {};
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

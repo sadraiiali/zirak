@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Design System v1.6 (Monochromatic)</title> <!-- Version Bump -->
+
+    <!-- React CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel CDN (for JSX Transformation in Browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Other CDNs -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <!-- Monaco Editor CDN -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main"
+        href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/editor/editor.main.min.css">
+    <!-- Monaco Loader SCRIPT (Loads the 'require' function) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.min.js"></script>
+
+    <!-- Monaco Loader Configuration -->
+    <script>
+        if (typeof require === 'function' && typeof require.config === 'function') {
+             require.config({
+                 paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' }
+             });
+            // console.log("Monaco require paths configured synchronously in index.html.");
+        } else {
+            console.error("Monaco loader (require) not found immediately after loader.min.js script. Configuration failed.");
+            document.body.innerHTML = '<p style="color: red; padding: 20px;">Error: Failed to configure code editor paths. The application cannot start correctly.</p>';
+        }
+    </script>
+
+    <style>
+        /* --- Base CSS Variables (Monochromatic & Consistent) --- */
+        :root {
+            --background: 0 0% 100%;                     /* white */
+            --foreground: 220 10% 15%;                   /* darker slate-800/900 */
+            --muted: 220 14% 96%;                     /* slate-100 */
+            --muted-foreground: 220 9% 46%;           /* slate-500 */
+            --card: 0 0% 100%;                         /* white */
+            --card-foreground: 220 10% 15%;           /* Match foreground */
+            --border: 220 13% 91%;                     /* slate-200 */
+            --input: 220 13% 91%;                      /* slate-200 */
+            --primary: 220 60% 55%;                    /* Desaturated blue */
+            --primary-foreground: 0 0% 100%;           /* white */
+            --secondary: 220 14% 96%;                  /* slate-100 (same as muted) */
+            --secondary-foreground: 220 10% 25%;       /* slate-700/800 */
+            --accent: 220 14% 93%;                     /* Slightly darker than muted/secondary for hover */
+            --accent-foreground: 220 10% 15%;          /* Match foreground */
+            --destructive: 0 65% 55%;                  /* Desaturated red */
+            --destructive-foreground: 0 0% 100%;       /* white */
+            --success: 160 50% 45%;                    /* Muted teal/green */
+            --success-foreground: 0 0% 100%;           /* white */
+            --ring: 220 60% 55%;                       /* Based on primary */
+            --radius: 0.375rem;                        /* Tailwind 'md' (6px) */
+        }
+        html { scroll-behavior: smooth; }
+        body { background-color: hsl(var(--muted)); color: hsl(var(--foreground)); font-family: Inter, BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif; margin: 0; }
+        .bg-background { background-color: hsl(var(--background)); }
+        .bg-card { background-color: hsl(var(--card)); }
+        .bg-muted { background-color: hsl(var(--muted)); }
+        .bg-primary { background-color: hsl(var(--primary)); }
+        .bg-secondary { background-color: hsl(var(--secondary)); }
+        .bg-accent { background-color: hsl(var(--accent)); }
+        .text-foreground { color: hsl(var(--foreground)); }
+        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+        .text-primary { color: hsl(var(--primary)); }
+        .text-primary-foreground { color: hsl(var(--primary-foreground)); }
+        .text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
+        .text-accent-foreground { color: hsl(var(--accent-foreground)); }
+        .text-destructive { color: hsl(var(--destructive)); }
+        .text-destructive-foreground { color: hsl(var(--destructive-foreground)); }
+        .text-success { color: hsl(var(--success)); }
+        .text-success-foreground { color: hsl(var(--success-foreground)); }
+        .border-border { border-color: hsl(var(--border)); }
+        .border-input { border-color: hsl(var(--input)); }
+        .border-primary { border-color: hsl(var(--primary)); }
+        .border-destructive { border-color: hsl(var(--destructive)); }
+        .border-success { border-color: hsl(var(--success)); }
+        .ring-ring { --tw-ring-color: hsl(var(--ring)); } /* For focus effects */
+        .rounded-md { border-radius: var(--radius); } /* Standardized radius */
+        @import url('https://rsms.me/inter/inter.css');
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+        ::-webkit-scrollbar-track { background: hsl(var(--muted)); border-radius: 3px; }
+        .card { @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm; } /* Keep using Tailwind for Cards */
+        .antialiased { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        [data-tooltip] { position: relative; }
+        [data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 12px; padding: 4px 8px; background-color: hsl(var(--foreground)); color: hsl(var(--background)); border-radius: 4px; font-size: 0.75rem; line-height: 1rem; white-space: nowrap; z-index: 50; pointer-events: none; opacity: 0; animation: tooltip-fade-in 0.15s 0.3s ease-in-out forwards; }
+        @keyframes tooltip-fade-in { to { opacity: 1; } }
+        .message-blob-text { @apply block w-full whitespace-pre-wrap break-words text-sm font-mono; }
+        /* Prose adjustments */
+        .prose { @apply max-w-none text-sm sm:text-base; }
+        .prose h1, .prose h2, .prose h3, .prose h4 { @apply font-semibold text-foreground; }
+        .prose h2 { @apply text-2xl border-b border-border pb-2 mb-6; }
+        .prose h3 { @apply text-xl mt-10 mb-3; }
+        .prose h4 { @apply text-base mt-6 mb-2; }
+        .prose p { @apply text-foreground leading-relaxed; }
+        .prose .lead { @apply text-base sm:text-lg text-muted-foreground; }
+        .prose a { @apply text-primary hover:text-primary/80; }
+        .prose ul { @apply list-disc space-y-1 pl-5 text-muted-foreground; }
+        .prose pre { @apply bg-muted border border-border rounded-md p-4 text-xs sm:text-sm text-foreground overflow-x-auto shadow-inner my-4; }
+        .prose code:not(pre > code) { @apply bg-muted text-xs font-mono px-1 py-0.5 rounded-sm border border-border text-primary/90; }
+        .prose code { @apply before:content-none after:content-none; }
+        .prose pre code { @apply bg-transparent border-none p-0 text-inherit font-inherit; }
+        .prose table { @apply text-sm border border-collapse border-border; }
+        .prose th { @apply p-2 border border-border font-medium text-muted-foreground bg-muted/50 text-left; }
+        .prose td { @apply p-2 border border-border text-foreground; }
+        /* Use variables for blockquote */
+        .prose blockquote { @apply border-l-4 border-border pl-4 text-foreground text-sm py-2 bg-background rounded-r-md shadow-sm my-4; }
+
+        /* --- BUTTON STYLES (Updated Radius, Icon Sizes) --- */
+        .button-60 {
+          align-items: center;
+          appearance: none;
+          background-color: hsl(var(--background));
+          border: 1px solid hsl(var(--border));
+          border-radius: var(--radius); /* UPDATED */
+          box-shadow: none;
+          box-sizing: border-box;
+          color: hsl(var(--foreground));
+          cursor: pointer;
+          display: inline-flex;
+          font-family: inherit;
+          font-size: 0.875rem; /* Adjusted base size slightly (Tailwind sm) */
+          height: 2.25rem; /* Tailwind h-9 */
+          justify-content: center;
+          line-height: 1.25rem; /* Tailwind leading-5 */
+          padding: 0 0.875rem; /* Approx 14px */
+          position: relative;
+          text-align: center;
+          user-select: none;
+          -webkit-user-select: none;
+          touch-action: manipulation;
+          vertical-align: middle;
+          white-space: nowrap;
+          transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out, color 0.1s ease-out;
+        }
+
+        .button-60:focus {
+          outline: none;
+          border-color: hsl(var(--ring));
+          box-shadow: 0 0 0 2px hsla(var(--ring), 0.25);
+        }
+
+        .button-60:hover {
+          border-color: hsl(var(--muted-foreground));
+          background-color: hsl(var(--accent));
+        }
+
+        .button-60:active {
+          border-color: hsl(var(--foreground));
+          background-color: hsl(var(--muted));
+        }
+
+        .button-60:disabled,
+        .button-60[disabled] {
+          opacity: 0.6;
+          cursor: not-allowed;
+          background-color: hsl(var(--muted));
+          border-color: hsl(var(--border));
+          color: hsl(var(--muted-foreground));
+          box-shadow: none;
+        }
+
+        /* Variants (Colors updated via variables) */
+        .button-60-primary { background-color: hsl(var(--primary)); border-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+        .button-60-primary:hover { background-color: hsl(var(--primary) / 0.9); border-color: hsl(var(--primary) / 0.9); }
+        .button-60-primary:active { background-color: hsl(var(--primary) / 0.8); border-color: hsl(var(--primary) / 0.8); }
+        .button-60-primary:focus { border-color: hsl(var(--primary)); box-shadow: 0 0 0 2px hsla(var(--ring), 0.3); }
+        .button-60-primary:disabled, .button-60-primary[disabled] { background-color: hsl(var(--primary) / 0.5); border-color: hsl(var(--primary) / 0.5); color: hsl(var(--primary-foreground) / 0.7); }
+
+        .button-60-secondary { background-color: hsl(var(--secondary)); border-color: hsl(var(--border)); color: hsl(var(--secondary-foreground)); }
+        .button-60-secondary:hover { background-color: hsl(var(--accent)); border-color: hsl(var(--muted-foreground)); } /* Use accent hover */
+        .button-60-secondary:active { background-color: hsl(var(--muted)); border-color: hsl(var(--foreground)); } /* Use muted active */
+        .button-60-secondary:focus { border-color: hsl(var(--ring)); box-shadow: 0 0 0 2px hsla(var(--ring), 0.25); }
+        .button-60-secondary:disabled, .button-60-secondary[disabled] { background-color: hsl(var(--secondary) / 0.8); border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); }
+
+        .button-60-outline { background-color: transparent; border-color: hsl(var(--border)); color: hsl(var(--secondary-foreground)); }
+        .button-60-outline:hover { background-color: hsl(var(--accent)); border-color: hsl(var(--muted-foreground)); color: hsl(var(--accent-foreground)); }
+        .button-60-outline:active { background-color: hsl(var(--muted)); border-color: hsl(var(--foreground)); }
+        .button-60-outline:focus { border-color: hsl(var(--ring)); box-shadow: 0 0 0 2px hsla(var(--ring), 0.25); }
+        .button-60-outline:disabled, .button-60-outline[disabled] { background-color: transparent; border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); opacity: 0.6; }
+
+        .button-60-ghost { background-color: transparent; border-color: transparent; color: hsl(var(--secondary-foreground)); }
+        .button-60-ghost:hover { background-color: hsl(var(--accent)); border-color: transparent; color: hsl(var(--accent-foreground)); }
+        .button-60-ghost:active { background-color: hsl(var(--muted)); }
+        .button-60-ghost:focus { background-color: hsl(var(--accent)); box-shadow: 0 0 0 2px hsla(var(--ring), 0.25); border-color: transparent; }
+        .button-60-ghost:disabled, .button-60-ghost[disabled] { background-color: transparent; border-color: transparent; color: hsl(var(--muted-foreground)); opacity: 0.6; }
+
+        .button-60-destructive { background-color: hsl(var(--destructive)); border-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); }
+        .button-60-destructive:hover { background-color: hsl(var(--destructive) / 0.9); border-color: hsl(var(--destructive) / 0.9); }
+        .button-60-destructive:active { background-color: hsl(var(--destructive) / 0.8); border-color: hsl(var(--destructive) / 0.8); }
+        .button-60-destructive:focus { border-color: hsl(var(--destructive)); box-shadow: 0 0 0 2px hsla(var(--destructive), 0.3); }
+        .button-60-destructive:disabled, .button-60-destructive[disabled] { background-color: hsl(var(--destructive) / 0.5); border-color: hsl(var(--destructive) / 0.5); color: hsl(var(--destructive-foreground) / 0.7); }
+
+        /* Sizes */
+        .button-60-sm {
+            font-size: 0.8125rem; /* Slightly smaller */
+            height: 2rem; /* Tailwind h-8 */
+            padding: 0 0.75rem; /* Approx 12px */
+        }
+        .button-60-xs {
+            font-size: 0.75rem; /* Tailwind xs */
+            height: 1.75rem; /* Tailwind h-7 */
+            padding: 0 0.625rem; /* Approx 10px */
+        }
+
+        /* Icon Buttons */
+        .button-60-icon { padding: 0; width: 2.25rem; /* Match height */ }
+        .button-60-icon-sm { padding: 0; width: 2rem; /* Match height */ }
+        .button-60-icon-xs { padding: 0; width: 1.75rem; /* Match height */ }
+
+        /* Icon alignment & UPDATED Sizes */
+         .button-60 > span[data-lucide],
+         .button-60 > i[data-lucide] {
+             margin-right: 0.4em;
+         }
+         .button-60-icon > span[data-lucide],
+         .button-60-icon > i[data-lucide],
+         .button-60-icon-sm > span[data-lucide],
+         .button-60-icon-sm > i[data-lucide],
+         .button-60-icon-xs > span[data-lucide],
+         .button-60-icon-xs > i[data-lucide] {
+             margin-right: 0;
+         }
+         /* Smaller icon sizes */
+         .button-60 > span[data-lucide], .button-60 > i[data-lucide] { @apply w-3.5 h-3.5; } /* UPDATED */
+         .button-60-sm > span[data-lucide], .button-60-sm > i[data-lucide] { @apply w-3 h-3; } /* UPDATED */
+         .button-60-xs > span[data-lucide], .button-60-xs > i[data-lucide] { @apply w-3 h-3; } /* UPDATED */
+
+
+        /* --- Tab Button Styles --- */
+        .tab-button { @apply px-4 py-2 -mb-px text-sm font-medium focus:outline-none transition-colors duration-150; }
+        .tab-button-active { @apply border-b-2 border-primary text-primary; }
+        .tab-button-inactive { @apply border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border; }
+        .monaco-editor-container { min-height: 100px; height: 300px; } /* Default height */
+
+        /* Tag helper classes (Muted Colors) */
+        .tag {
+         @apply inline-flex items-center gap-x-1 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset;
+        }
+        .tag-lg { @apply px-3 py-1 text-sm rounded-md; }
+
+        /* Use slightly muted colors */
+        .tag-blue { @apply bg-blue-50 text-blue-900 ring-blue-500/30 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30; }
+        .tag-green { @apply bg-emerald-50 text-emerald-900 ring-emerald-600/30 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/20; }
+        .tag-purple { @apply bg-purple-50 text-purple-700 ring-purple-500/30 dark:bg-purple-400/10 dark:text-purple-400 dark:ring-purple-400/20; }
+        .tag-gray { @apply bg-gray-50 text-gray-900 ring-gray-500/30 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20; }
+        .tag-yellow { @apply bg-yellow-50 text-yellow-900 ring-yellow-600/30 dark:bg-yellow-400/10 dark:text-yellow-500 dark:ring-yellow-400/20; }
+        .tag-teal { @apply bg-teal-50 text-teal-700 ring-teal-500/30 dark:bg-teal-400/10 dark:text-teal-400 dark:ring-teal-400/20; }
+        .tag-slate { @apply bg-slate-50 text-slate-700 ring-slate-500/30 dark:bg-slate-400/10 dark:text-slate-400 dark:ring-slate-400/20; }
+        .tag-red { @apply bg-red-50 text-red-900 ring-red-600/20 dark:bg-red-400/10 dark:text-red-400 dark:ring-red-400/20; }
+        /* Variable based tags */
+        .tag-primary { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); }
+        .tag-muted { background-color: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+        .tag-destructive { background-color: hsl(var(--destructive) / 0.1); color: hsl(var(--destructive)); }
+        .tag-success { background-color: hsl(var(--success) / 0.1); color: hsl(var(--success)); }
+
+        /* Modal Transition */
+        .modal-overlay-enter { opacity: 0; }
+        /* ... rest of modal transitions ... */
+
+        /* Loading Placeholder */
+        #root:empty::before {
+            content: "Loading Design System...";
+            /* ... rest of placeholder styles ... */
+        }
+
+        /* --- CHECKBOX STYLES (Updated Radius, Variables) --- */
+        .checkbox-wrapper-35 .switch { display: none; }
+        .checkbox-wrapper-35 .switch + label {
+            align-items: center; color: hsl(var(--muted-foreground)); cursor: pointer; display: flex;
+            font-family: inherit; font-size: 12px; line-height: 15px; position: relative; user-select: none;
+        }
+        .checkbox-wrapper-35 .switch + label::before,
+        .checkbox-wrapper-35 .switch + label::after { content: ''; display: block; }
+        .checkbox-wrapper-35 .switch + label::before {
+            background-color: hsl(var(--border)); /* Use variable */
+            border-radius: 9999px; /* UPDATED - Tailwind rounded-full */
+            height: 15px; margin-right: 8px; transition: background-color 0.125s ease-out; width: 25px;
+        }
+        .checkbox-wrapper-35 .switch + label::after {
+            background-color: hsl(var(--background)); /* Use variable */
+            border-radius: 9999px; /* UPDATED - Tailwind rounded-full */
+            box-shadow: 0 1px 1px 0 rgba(37, 34, 71, 0.05), 0 1px 2px 0 rgba(37, 34, 71, 0.1), 0 1px 3px 0 rgba(37, 34, 71, 0.05);
+            height: 13px; left: 1px; position: absolute; top: 1px; transition: transform 0.125s ease-out; width: 13px;
+        }
+        .checkbox-wrapper-35 .switch + label .switch-x-text { display: block; margin-right: .3em; color: hsl(var(--foreground)); }
+        .checkbox-wrapper-35 .switch + label .switch-x-toggletext { display: block; font-weight: bold; height: 15px; overflow: hidden; position: relative; width: 25px; color: hsl(var(--secondary-foreground)); }
+        .checkbox-wrapper-35 .switch + label .switch-x-unchecked,
+        .checkbox-wrapper-35 .switch + label .switch-x-checked { left: 0; position: absolute; top: 0; transition: transform 0.125s ease-out, opacity 0.125s ease-out; }
+        .checkbox-wrapper-35 .switch + label .switch-x-unchecked { opacity: 1; transform: none; }
+        .checkbox-wrapper-35 .switch + label .switch-x-checked { opacity: 0; transform: translate3d(0, 100%, 0); }
+        .checkbox-wrapper-35 .switch + label .switch-x-hiddenlabel { position: absolute; visibility: hidden; }
+        .checkbox-wrapper-35 .switch:checked + label::before { background-color: hsl(var(--primary)); } /* Use variable */
+        .checkbox-wrapper-35 .switch:checked + label::after { transform: translate3d(10px, 0, 0); }
+        .checkbox-wrapper-35 .switch:checked + label .switch-x-unchecked { opacity: 0; transform: translate3d(0, -100%, 0); }
+        .checkbox-wrapper-35 .switch:checked + label .switch-x-checked { opacity: 1; transform: none; }
+        .checkbox-wrapper-35 .switch:focus + label::before { box-shadow: 0 0 0 2px hsla(var(--ring), 0.3); } /* Use variable */
+
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- Root element for React -->
+    <div id="root"></div>
+
+    <!-- Load React App SCRIPT -->
+    <script type="text/babel" src="main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastodon AI Bot Interaction</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <!-- AlpineJS -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucid Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Optional: Add custom styles or animations if needed */
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden" x-data="aiInteractionPanel()" x-cloak>
+        <div class="md:flex">
+            <!-- Left Panel: User Input -->
+            <div class="md:w-1/3 p-6 md:p-8 border-r border-gray-200 bg-gradient-to-br from-slate-50 to-slate-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i data-lucide="message-square-plus" class="w-6 h-6 mr-2 text-indigo-600"></i>
+                    Your Message
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="userInput" class="block text-sm font-medium text-gray-700 mb-1">Compose a message for the AI:</label>
+                        <textarea
+                            id="userInput"
+                            rows="6"
+                            class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-gray-700"
+                            placeholder="e.g., What's the weather like in Tokyo?"
+                            x-model="userInput"
+                            :disabled="processing"
+                        ></textarea>
+                    </div>
+                    <button
+                        @click="submitToAI"
+                        :disabled="processing || !userInput.trim()"
+                        class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out"
+                    >
+                        <span x-show="!processing" class="flex items-center">
+                            <i data-lucide="send" class="w-5 h-5 mr-2"></i>
+                            Ask AI Agent
+                        </span>
+                        <span x-show="processing" class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            Processing...
+                        </span>
+                    </button>
+                     <p x-show="error" class="text-sm text-red-600 mt-2" x-text="error"></p>
+                </div>
+            </div>
+
+            <!-- Right Panel: AI Processing Steps -->
+            <div class="md:w-2/3 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i data-lucide="bot" class="w-6 h-6 mr-2 text-teal-600"></i>
+                    AI Agent Response Sequence
+                </h2>
+
+                <div class="space-y-4 min-h-[300px] flex flex-col">
+
+                    <div x-show="!processing && processedSteps.length === 0" class="flex-grow flex items-center justify-center text-gray-500">
+                        <i data-lucide="info" class="w-5 h-5 mr-2"></i>
+                        <span>The AI's process will appear here after you submit a message.</span>
+                    </div>
+
+                    <!-- Display User Input when processing starts -->
+                     <div x-show="processing || processedSteps.length > 0"
+                          class="p-4 mb-4 border border-gray-200 rounded-lg bg-gray-50 shadow-sm"
+                          x-transition:enter="transition ease-out duration-300"
+                          x-transition:enter-start="opacity-0 scale-95"
+                          x-transition:enter-end="opacity-100 scale-100">
+                         <p class="text-sm font-medium text-gray-500 mb-1">Your Input:</p>
+                         <p class="text-gray-800 italic" x-text="submittedInput"></p>
+                     </div>
+
+                    <!-- AI Steps -->
+                    <template x-for="(step, index) in processedSteps" :key="index">
+                        <div class="flex items-start p-4 border border-gray-200 rounded-lg bg-white shadow-sm transition-all duration-500 ease-in-out"
+                             :class="{ 'border-l-4 border-teal-500': step.status === 'complete', 'border-l-4 border-blue-500 animate-pulse': step.status === 'processing', 'opacity-60': step.status === 'pending' }"
+                             x-show="currentStep >= index"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+
+                            <div class="mr-4 flex-shrink-0 pt-1">
+                                <!-- Icon based on status -->
+                                <span x-show="step.status === 'complete'" class="text-teal-500">
+                                    <i :data-lucide="step.icon" class="w-5 h-5"></i>
+                                </span>
+                                <span x-show="step.status === 'processing'" class="text-blue-500">
+                                    <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
+                                </span>
+                                <span x-show="step.status === 'pending'" class="text-gray-400">
+                                    <i data-lucide="circle-dashed" class="w-5 h-5"></i>
+                                </span>
+                            </div>
+
+                            <div class="flex-grow">
+                                <p class="font-semibold text-gray-800" x-text="step.title"></p>
+                                <p class="text-sm text-gray-600" x-text="step.description"></p>
+                                <p x-show="step.details" class="text-xs text-gray-500 mt-1 italic" x-text="step.details"></p>
+                            </div>
+
+                             <!-- Optional: Show Checkmark when complete instead of original icon -->
+                             <div class="ml-4 flex-shrink-0 pt-1 text-teal-500" x-show="step.status === 'complete'">
+                                 <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                             </div>
+                        </div>
+                    </template>
+
+                    <!-- Final Output / Result -->
+                    <div x-show="finalOutput"
+                         class="mt-6 p-5 border border-green-300 rounded-lg bg-green-50 shadow-sm"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100">
+                        <h3 class="text-lg font-semibold text-green-800 mb-2 flex items-center">
+                            <i data-lucide="check-check" class="w-5 h-5 mr-2"></i>
+                            AI Response Generated
+                        </h3>
+                        <p class="text-gray-800 whitespace-pre-wrap" x-text="finalOutput"></p>
+                         <!-- Example: Add a "Post to Mastodon" button -->
+                         <button class="mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 transition">
+                             Post to Mastodon
+                         </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function aiInteractionPanel() {
+            return {
+                userInput: '',
+                submittedInput: '', // Store the input when submitted
+                processing: false,
+                error: '',
+                // Define the potential steps the AI might take
+                aiStepsDefinition: [
+                    { id: 1, icon: 'log-in', title: 'Receiving Input', description: 'Parsing your message...', status: 'pending', details: '', duration: 500 },
+                    { id: 2, icon: 'search', title: 'Understanding Intent', description: 'Analyzing the request type...', status: 'pending', details: '', duration: 800 },
+                    { id: 3, icon: 'database', title: 'Fetching Data', description: 'Querying knowledge base or external APIs...', status: 'pending', details: '', duration: 1200 },
+                    { id: 4, icon: 'message-circle', title: 'Generating Response', description: 'Composing the answer...', status: 'pending', details: '', duration: 1000 },
+                    { id: 5, icon: 'clipboard-check', title: 'Formatting for Mastodon', description: 'Ensuring compatibility and tone...', status: 'pending', details: '', duration: 600 },
+                    { id: 6, icon: 'send', title: 'Ready to Post', description: 'The final message is prepared.', status: 'pending', details: '', duration: 300 } // Final step before output shows
+                ],
+                processedSteps: [], // Holds the steps currently being displayed/processed
+                currentStep: -1,    // Index of the step currently being processed
+                finalOutput: '',    // The final result from the AI
+
+                submitToAI() {
+                    if (this.processing || !this.userInput.trim()) return;
+
+                    this.processing = true;
+                    this.error = '';
+                    this.submittedInput = this.userInput; // Save the input
+                    this.finalOutput = '';
+                    this.processedSteps = JSON.parse(JSON.stringify(this.aiStepsDefinition)); // Deep copy steps
+                    this.processedSteps.forEach(step => step.status = 'pending'); // Reset status
+                    this.currentStep = -1;
+
+                    // Need to call createIcons AFTER the template elements are rendered by Alpine
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        this.processNextStep(); // Start the sequence
+                    });
+                },
+
+                processNextStep() {
+                    // Mark previous step as complete (if any)
+                    if (this.currentStep >= 0 && this.currentStep < this.processedSteps.length) {
+                        this.processedSteps[this.currentStep].status = 'complete';
+                        // Add example detail
+                        if (this.processedSteps[this.currentStep].id === 2) {
+                           this.processedSteps[this.currentStep].details = 'Detected: Question';
+                        }
+                    }
+
+                    this.currentStep++;
+
+                    if (this.currentStep < this.processedSteps.length) {
+                        const step = this.processedSteps[this.currentStep];
+                        step.status = 'processing';
+
+                        // Refresh icons for the new status (spinners etc.)
+                        this.$nextTick(() => {
+                             lucide.createIcons();
+                        });
+
+                        // Simulate processing time
+                        setTimeout(() => {
+                            // Make sure we are still processing this request
+                            // (user might have cancelled or submitted again quickly)
+                            if (this.processing && this.processedSteps[this.currentStep]?.status === 'processing') {
+                                this.processNextStep();
+                            }
+                        }, step.duration || 1000); // Use defined duration or default
+
+                    } else {
+                        // All steps completed
+                        this.generateFinalOutput();
+                        this.processing = false;
+                         // Refresh icons (e.g., final checkmarks)
+                        this.$nextTick(() => {
+                             lucide.createIcons();
+                        });
+                    }
+                },
+
+                generateFinalOutput() {
+                    // Simulate generating the final AI output based on the input
+                    this.finalOutput = `Okay, based on your request:\n"${this.submittedInput}"\n\nHere's a draft post:\n\n[Generated content relevant to the input would go here. This is just a placeholder.]\n\n#AI #MastodonBot`;
+                    // You would replace this with the actual AI response logic
+                },
+
+                // Initialize icons on component load
+                init() {
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                }
+            }
+        }
+
+        // Initialize Lucid Icons globally after page load as well
+        // Although Alpine's init() should handle component icons,
+        // this ensures any static icons outside components are also rendered.
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+
+</body>
+</html>
