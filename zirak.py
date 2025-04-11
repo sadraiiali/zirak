@@ -109,6 +109,16 @@ def main():
     # Load commands from src/commands directory
     load_commands(application)
     
+    # Check for the "run" command pattern
+    if len(sys.argv) > 1 and sys.argv[1] == "run":
+        if len(sys.argv) == 2:
+            # No task specified, show help for run command
+            sys.argv = [sys.argv[0], "run"]
+        else:
+            # Extract the task and any additional arguments
+            task = sys.argv[2]
+            # Keep the original command structure for the run command to process
+    
     # Run the Cleo application
     exit_code = application.run()
     sys.exit(exit_code)

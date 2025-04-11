@@ -1,25 +1,18 @@
-import os
 import sys
 from cleo.commands.command import Command
 from cleo.helpers import option
+from src.settings import settings
 
 class CheckAuthCommand(Command):
     name = "check-auth"
     description = "Check authentication against configured Mastodon instances"
     options = [
-        option(
-            "verbose",
-            "v",
-            description="Increase the verbosity of messages",
-            flag=True
-        )
     ]
     
     def handle(self):
         """Check authentication against various Mastodon instances"""
         # Import here to avoid loading dependencies when just showing help
-        from mastodon import Mastodon
-        from src.settings import settings
+        
         
         # Get credentials from settings
         client_id = settings.credentials.client_id.get_secret_value()

@@ -4,7 +4,7 @@ from cleo.commands.command import Command
 from cleo.helpers import option
 
 class RunBotCommand(Command):
-    name = "run-bot"
+    name = "bot"
     description = "Start the Zirak bot with notification polling"
     options = [
         option(
