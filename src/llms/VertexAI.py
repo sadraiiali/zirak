@@ -1,8 +1,11 @@
 import os
 import sys
+import logging
 from typing import Dict, List, Generator, Union, Optional, Any
 
 from .General import LLMBase
+
+logger = logging.getLogger(__name__)
 
 class VertexAI(LLMBase):
     """Implementation of LLMBase for Google Vertex AI."""
@@ -460,6 +463,68 @@ class VertexAI(LLMBase):
                 
         except Exception as e:
             yield f"\nError with grounding: {str(e)}"
+
+    async def generate_research_response(self, prompt, context=None):
+        """
+        Generate a detailed research response suitable for Telegraph.
+        
+        Args:
+            prompt (str): The user's query
+            context (str, optional): Additional context
+            
+        Returns:
+            dict: Research data including sections, sources, etc.
+        """
+        research_prompt = f"""
+        You are conducting detailed research on the following query:
+        
+        {prompt}
+        
+        Please provide a comprehensive analysis with the following structure:
+        1. A title for this research
+        2. A brief introduction
+        3. Multiple sections covering different aspects of the topic
+        4. Sources or references where applicable
+        5. A conclusion
+        6. A brief summary (2-3 sentences) of your findings
+        
+        Format your response as structured data that can be converted to HTML.
+        """
+        
+        if context:
+            research_prompt += f"\n\nAdditional context:\n{context}"
+        
+        response = await self._generate_response(research_prompt)
+        
+        # Parse the response into structured data
+        # This is a simplified example - you might need more robust parsing
+        try:
+            # Extract sections, sources, etc. from the response
+            # This is a placeholder for actual parsing logic
+            research_data = {
+                "title": "Research Results",  # Extract from response
+                "introduction": "...",  # Extract from response
+                "sections": [
+                    {"title": "Section 1", "content": "..."},
+                    # More sections...
+                ],
+                "sources": [
+                    {"title": "Source 1", "url": "https://example.com"},
+                    # More sources...
+                ],
+                "conclusion": "...",  # Extract from response
+                "summary": "..."  # Extract from response
+            }
+            
+            return {
+                "research_data": research_data,
+                "summary": "Brief summary of findings"  # For Mastodon post
+            }
+        except Exception as e:
+            logger.error(f"Failed to parse research response: {str(e)}")
+            return {
+                "summary": "I conducted research on your query but encountered an error formatting the results."
+            }
 
 # Example usage demo
 if __name__ == "__main__":
