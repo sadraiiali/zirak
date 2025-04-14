@@ -3,6 +3,7 @@ from src.llms.VertexAI import VertexAI
 from src.helpers.prompts import get_prompt
 import os
 import html2text
+from src.helpers.telegraph_helper import TelegraphHelper
 
 # Set up logger
 logger = get_logger("notifications")
@@ -87,116 +88,141 @@ def get_ai_response(thread, username):
         return "I'm sorry, I'm having trouble processing your request right now."
 
 
-# Define a notification callback function
-async def notification_handler(
-    event_type, notification_data, done_callback, client=None
-):
-    """
-    Example callback function for processing notifications
+class NotificationHandler:
+    def __init__(self, mastodon_client, llm_client):
+        self.mastodon_client = mastodon_client
+        self.llm_client = llm_client
+        self.telegraph_helper = TelegraphHelper()
 
-    Args:
-        event_type: Type of notification (mention, follow, favourite, reblog, etc.)
-        notification_data: Full notification data from Mastodon
-        done_callback: Function to call to mark notification as processed
-        client: Instance of MastodonClient to use for API calls
-    """
-    account = notification_data.get("account", {})
-    username = account.get("acct", "unknown")
+    async def process_mention(self, notification):
+        logger.debug(f"Processing mention notification from @{notification['account']['acct']}")
+        status = notification.get("status", {})
+        status_id = status.get("id")
+        logger.info(f"CALLBACK: New mention from @{notification['account']['acct']}: {status.get('content', '')[:50]}...")
 
-    logger.debug(f"Received notification of type: {event_type} from user: {username}")
+        # Trace the thread from the mention to the top post
+        if self.mastodon_client and status_id:
+            logger.debug(f"Retrieving thread for status_id: {status_id}")
+            # Get the full thread
+            thread = self.mastodon_client.get_thread(status_id)
 
-    try:
-        if event_type == "mention":
-            logger.debug(f"Processing mention notification from @{username}")
-            status = notification_data.get("status", {})
-            content = status.get("content", "")
-            status_id = status.get("id")
-            logger.info(f"CALLBACK: New mention from @{username}: {content[:50]}...")
-
-            # Trace the thread from the mention to the top post
-            if client and status_id:
-                logger.debug(f"Retrieving thread for status_id: {status_id}")
-                # Get the full thread
-                thread = client.get_thread(status_id)
-
-                if thread:
-                    logger.info(f"Found a thread with {len(thread)} posts")
-                    logger.debug(
-                        f"Thread details: {len(thread)} posts with status_id {status_id}"
-                    )
-
-                    # Print all posts in the thread from top to bottom
-                    logger.info("======= THREAD BEGIN =======")
-                    for i, post in enumerate(thread):
-                        post_account = post.get("account", {})
-                        post_username = post_account.get("acct", "unknown")
-                        post_content = clean_html_content(post.get("content", ""))
-
-                        logger.info(
-                            f"[{i+1}/{len(thread)}] @{post_username}: {post_content[:200]}"
-                        )
-                        if len(post_content) > 200:
-                            logger.info("... (content truncated)")
-                    logger.info("======= THREAD END =======")
-
-                    # Get reply from VertexAI
-                    logger.debug(
-                        f"Generating AI response for thread with {len(thread)} posts"
-                    )
-                    reply_content = get_ai_response(thread, username)
-                    logger.info(f"AI generated reply: {reply_content}")
-                else:
-                    # Fallback if we couldn't get the thread
-                    logger.debug("Failed to retrieve thread, using fallback response")
-                    reply_content = "Hi! I noticed your mention, but I couldn't retrieve the full conversation context."
-
-                # Reply using the generated content
-                logger.debug(f"Sending reply to @{username} for status_id: {status_id}")
-                client.reply_to_mention(status, reply_content)
-                logger.info(f"CALLBACK: Replied to @{username}")
-            else:
-                logger.error(
-                    "Missing client or status_id, couldn't process mention properly"
+            if thread:
+                logger.info(f"Found a thread with {len(thread)} posts")
+                logger.debug(
+                    f"Thread details: {len(thread)} posts with status_id {status_id}"
                 )
 
-            # Mark the notification as done after handling it
-            logger.debug(f"Marking mention notification from @{username} as done")
-            done_callback()
+                # Print all posts in the thread from top to bottom
+                logger.info("======= THREAD BEGIN =======")
+                for i, post in enumerate(thread):
+                    post_account = post.get("account", {})
+                    post_username = post_account.get("acct", "unknown")
+                    post_content = clean_html_content(post.get("content", ""))
 
-        elif event_type == "follow":
-            logger.debug(f"Processing follow notification from @{username}")
-            logger.info(f"CALLBACK: New follower: @{username}!")
-            # Maybe send them a welcome message
+                    logger.info(
+                        f"[{i+1}/{len(thread)}] @{post_username}: {post_content[:200]}"
+                    )
+                    if len(post_content) > 200:
+                        logger.info("... (content truncated)")
+                logger.info("======= THREAD END =======")
 
-            # Mark as done after processing
-            logger.debug(f"Marking follow notification from @{username} as done")
-            done_callback()
+                # Get reply from VertexAI
+                logger.debug(
+                    f"Generating AI response for thread with {len(thread)} posts"
+                )
+                reply_content = get_ai_response(thread, notification['account']['acct'])
+                logger.info(f"AI generated reply: {reply_content}")
+            else:
+                # Fallback if we couldn't get the thread
+                logger.debug("Failed to retrieve thread, using fallback response")
+                reply_content = "Hi! I noticed your mention, but I couldn't retrieve the full conversation context."
 
-        elif event_type == "favourite":
-            logger.debug(f"Processing favourite notification from @{username}")
-            logger.info(f"CALLBACK: @{username} favorited your post!!")
-            # Auto-dismiss favorites
-            logger.debug(f"Marking favourite notification from @{username} as done")
-            done_callback()
-
-        elif event_type == "reblog":
-            logger.debug(f"Processing reblog notification from @{username}")
-            logger.info(f"CALLBACK: @{username} boosted your post")
-            # Auto-dismiss boosts
-            logger.debug(f"Marking reblog notification from @{username} as done")
-            done_callback()
-
+            # Check if this requires extensive research
+            needs_extensive_research = self.llm_client.is_extensive_research(reply_content)
+            
+            if needs_extensive_research:
+                # Generate detailed research response
+                detailed_response = await self.llm_client.generate_research_response(
+                    reply_content, 
+                    thread
+                )
+                
+                # Format for Telegraph
+                research_data = detailed_response.get("research_data", {})
+                title = f"Research: {research_data.get('title', 'Requested Information')}"
+                html_content = self.telegraph_helper.format_content(research_data)
+                
+                # Create Telegraph page
+                telegraph_url = await self.telegraph_helper.create_page(title, html_content)
+                
+                if telegraph_url:
+                    # Create a brief response with the link for Mastodon
+                    brief_response = f"I've completed the research you requested. The full details are available here: {telegraph_url}"
+                    
+                    if "summary" in research_data:
+                        brief_response = f"{research_data['summary']}\n\nFull details: {telegraph_url}"
+                else:
+                    # Fallback if Telegraph creation fails
+                    brief_response = "I've completed your research request, but couldn't create an external page. Here's a summary:\n\n"
+                    brief_response += detailed_response.get("summary", "Unable to provide summary.")
+                    
+                # Post the response to Mastodon
+                await self.mastodon_client.post_status(
+                    brief_response,
+                    in_reply_to_id=status['id'],
+                    visibility=status['visibility']
+                )
+            else:
+                # Reply using the generated content
+                logger.debug(f"Sending reply to @{notification['account']['acct']} for status_id: {status_id}")
+                await self.mastodon_client.reply_to_mention(status, reply_content)
+                logger.info(f"CALLBACK: Replied to @{notification['account']['acct']}")
         else:
-            # For other notification types, mark as done
-            logger.debug(
-                f"Processing unknown notification type: {event_type} from @{username}"
+            logger.error(
+                "Missing client or status_id, couldn't process mention properly"
             )
-            logger.info(
-                f"CALLBACK: Received {event_type} notification, marking as done"
-            )
-            logger.debug(f"Marking {event_type} notification from @{username} as done")
-            done_callback()
 
-    except Exception as e:
-        logger.error(f"Error in notification handler: {e}")
-        logger.debug(f"Exception details: {str(e)}")
+        # Mark the notification as done after handling it
+        logger.debug(f"Marking mention notification from @{notification['account']['acct']} as done")
+        await self.mastodon_client.mark_notification_as_done(notification)
+
+    async def process_follow(self, notification):
+        logger.debug(f"Processing follow notification from @{notification['account']['acct']}")
+        logger.info(f"CALLBACK: New follower: @{notification['account']['acct']}!")
+        # Maybe send them a welcome message
+
+        # Mark as done after processing
+        logger.debug(f"Marking follow notification from @{notification['account']['acct']} as done")
+        await self.mastodon_client.mark_notification_as_done(notification)
+
+    async def process_favourite(self, notification):
+        logger.debug(f"Processing favourite notification from @{notification['account']['acct']}")
+        logger.info(f"CALLBACK: @{notification['account']['acct']} favorited your post!!")
+        # Auto-dismiss favorites
+        logger.debug(f"Marking favourite notification from @{notification['account']['acct']} as done")
+        await self.mastodon_client.mark_notification_as_done(notification)
+
+    async def process_reblog(self, notification):
+        logger.debug(f"Processing reblog notification from @{notification['account']['acct']}")
+        logger.info(f"CALLBACK: @{notification['account']['acct']} boosted your post")
+        # Auto-dismiss boosts
+        logger.debug(f"Marking reblog notification from @{notification['account']['acct']} as done")
+        await self.mastodon_client.mark_notification_as_done(notification)
+
+    async def process_unknown(self, notification):
+        # For other notification types, mark as done
+        logger.debug(
+            f"Processing unknown notification type: {notification['type']} from @{notification['account']['acct']}"
+        )
+        logger.info(
+            f"CALLBACK: Received {notification['type']} notification, marking as done"
+        )
+        logger.debug(f"Marking {notification['type']} notification from @{notification['account']['acct']} as done")
+        await self.mastodon_client.mark_notification_as_done(notification)
+
+    async def process_notification(self, notification):
+        try:
+            await self.process_mention(notification)
+        except Exception as e:
+            logger.error(f"Error in notification handler: {e}")
+            logger.debug(f"Exception details: {str(e)}")

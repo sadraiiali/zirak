@@ -86,3 +86,37 @@ class LLMBase(ABC):
         except Exception as e:
             print(f"Error loading configuration: {e}")
             return {}
+
+class GeneralLLM(LLMBase):
+    def is_extensive_research(self, prompt):
+        """
+        Determine if a prompt requires extensive research based on:
+        - Length of prompt
+        - Complexity (presence of multiple questions)
+        - Explicit request for detailed research
+        
+        Args:
+            prompt (str): The user prompt
+            
+        Returns:
+            bool: True if extensive research is needed
+        """
+        # Check for explicit research requests
+        research_keywords = [
+            "research", "investigate", "detailed analysis", 
+            "comprehensive", "in-depth", "thorough"
+        ]
+        
+        if any(keyword in prompt.lower() for keyword in research_keywords):
+            return True
+            
+        # Check for complexity based on question count
+        question_count = prompt.count("?")
+        if question_count >= 3:
+            return True
+            
+        # Check for length - long prompts often need detailed responses
+        if len(prompt) > 300:  # Arbitrary threshold
+            return True
+            
+        return False
